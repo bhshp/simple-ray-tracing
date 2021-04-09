@@ -2,47 +2,51 @@
 #include <fstream>
 #include <iostream>
 
+#include "color.h"
+#include "config.h"
 #include "ray.h"
-#include "vec3.h"
+#include "vec.h"
 
-const int width_ratio = 16;
-const int height_ratio = 9;
-const double aspect_ratio = 1.0 * width_ratio / height_ratio;
-
-const int image_width = 400;
-const int image_height = static_cast<int>(1.0 * image_width / aspect_ratio);
-
-double viewport_height = 2.0;
-double viewport_width = aspect_ratio * viewport_height;
-double focal_length = 1.0;
-
-vec3 origin{0, 0, 0};
-vec3 horizontal{viewport_width, 0, 0};
-vec3 vertical{0, viewport_height, 0};
-vec3 lower_left = origin - horizontal / 2 - vertical / 2 - vec3{0, 0, focal_length};
+vec origin{0, 0, 0};
+vec horizontal{viewport_width, 0, 0};
+vec vertical{0, viewport_height, 0};
+vec lower_left = origin - (horizontal * 0.5) - (vertical * 0.5) - vec{0, 0, focal_length};
 
 using std::endl;
 using std::floor;
 using std::ofstream;
 
-color ray_color(const ray& r) {
-    vec3 unit = r.direction().unit();
-    double t = 0.5 * (unit.y() + 1);
-    return (1.0 - t) * color{1.0, 1.0, 1.0} +
-           t * color{0.5, 0.7, 1.0};
+double hit_sphere(const point& center, double radius, const ray& r) {
+    vec oc = r.origin() - center;
+    double a = r.direction().length2();
+    double half_b = oc * r.direction();
+    double c = oc.length2() - sqr(radius);
+    double discriminant = half_b * half_b - a * c;
+    return discriminant < 0 ? -1.0 : (-half_b - sqrt(discriminant)) / a;
 }
 
-int main(int argc, char** argv) {
-    ofstream out("out.ppm");
+color ray_color(const ray& r) {
+    double t = hit_sphere(point(0, 0, -1), 0.5, r);
+    if (t > 0.0) {
+        vec N = (r.at(t) - vec(0, 0, -1)).unit();
+        return 0.5 * color(N.x() + 1, N.y() + 1, N.z() + 1);
+    }
+    vec unit_direction = r.direction().unit();
+    t = 0.5 * (unit_direction.y() + 1.0);
+    return (1.0 - t) * color(1.0, 1.0, 1.0) + t * color(0.5, 0.7, 1.0);
+}
+
+int main() {
+    ofstream out(path);
     out << "P3\n"
         << image_width << ' ' << image_height << "\n255\n";
     for (int i = image_height - 1; i >= 0; i--) {
         for (int j = 0; j < image_width; j++) {
-            double u = 1.0;  //double(j) / (image_width - 1);
-            double v = 1.0;  //double(i) / (image_height - 1);
+            double u = double(j) / (image_width - 1);
+            double v = double(i) / (image_height - 1);
             ray r{origin, lower_left + u * horizontal + v * vertical - origin};
             color pixel = ray_color(r);
-            out << pixel << std::endl;
+            out << color_cast(pixel) << '\n';
         }
     }
     return 0;
