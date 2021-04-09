@@ -32,3 +32,5 @@
 *.app
 
 *.ppm
+/target/*
+!/target/current.jpg
