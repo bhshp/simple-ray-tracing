@@ -113,6 +113,11 @@ struct vec3 {
     double z_;
 };
 
+template <typename T>
+vec3 operator*(T val, const vec3 &t) {
+    return vec3{val * t.x(), val * t.y(), val * t.z()};
+}
+
 using point = vec3;
 using color = vec3;
 

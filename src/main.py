@@ -1,4 +1,5 @@
 import cv2
 
-img = cv2.imread('out.ppm')
-cv2.imwrite('out.bmp', img)
+if __name__ == '__main__':
+    img = cv2.imread('out.ppm')
+    cv2.imwrite('out.jpg', img)
