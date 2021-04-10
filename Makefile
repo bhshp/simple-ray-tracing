@@ -21,9 +21,9 @@ endif
 run:
 	make
 	time -f "%E elapsed." ./$(target)
-	python -c "import cv2;cv2.imwrite('${target_image}', cv2.imread('${temp_image}'))" && code ./${target_image}
+	python -c "import cv2;cv2.imwrite('$(target_image)', cv2.imread('$(temp_image)'))" && code ./$(target_image)
 ifndef keep-temp
-	rm -rf ${temp_image}
+	rm -rf $(temp_image)
 endif
 	rm -rf $(target)
 
