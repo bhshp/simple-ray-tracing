@@ -6,9 +6,15 @@
 #include <cmath>     // std::sqrt
 #include <iostream>  // std::ostream
 
-#include "util.h"
+inline double sqr(double x) {
+    return x * x;
+}
 
 struct vec {
+    friend inline std::ostream &operator<<(std::ostream &os, const vec &v) {
+        return os << v.x_ << ' ' << v.y_ << ' ' << v.z_;
+    }
+
    public:
     vec(double _x, double _y, double _z) : x_{_x}, y_{_y}, z_{_z} {}
     vec() : vec{0, 0, 0} {}
@@ -106,6 +112,5 @@ vec operator*(T val, const vec &t) {
 }
 
 using point = vec;
-using color = vec;
 
 #endif  // vec_H_

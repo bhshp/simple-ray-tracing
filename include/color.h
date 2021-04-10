@@ -3,42 +3,65 @@
 #ifndef COLOR_H_
 #define COLOR_H_
 
-#include <iostream>
+#include <iostream>  // std::ostream
 
 #include "vec.h"
 
-int color_cast(double color) {
-    if (color <= 0) {
+inline int color_cast(double c) {
+    if (c <= 0) {
         return 0;
-    } else if (color >= 1.0) {
+    } else if (c >= 1.0) {
         return 255;
     }
-    return static_cast<int>(color * 256.0);
+    return static_cast<int>(c * 256.0);
 }
 
-namespace impl {
-struct color_cast_impl {
+struct color {
    public:
-    color_cast_impl(const vec &v) : v_(v) {}
-    double x() const { return v_.x(); }
-    double y() const { return v_.y(); }
-    double z() const { return v_.z(); }
+    friend inline std::ostream &operator<<(std::ostream &os, const color &c) {
+        return os << color_cast(c.r_) << ' ' << color_cast(c.g_) << ' ' << color_cast(c.b_);
+    }
+
+    color(double r, double g, double b) : r_(r), g_(g), b_(b) {}
+    color(const vec &v) : r_{v.x()}, g_{v.y()}, b_{v.z()} {}
+
+    double r() const { return r_; }
+    double g() const { return g_; }
+    double b() const { return b_; }
+
+    color operator+(const color &c) const {
+        return color{r_ + c.r_, g_ + c.g_, b_ + c.b_};
+    }
+
+    color operator-(const color &c) const {
+        return color{r_ - c.r_, g_ - c.g_, b_ - c.b_};
+    }
+
+    color operator-() const {
+        return color{-r_, -g_, -b_};
+    }
+
+    color &operator+=(const color &c) {
+        r_ += c.r_;
+        g_ += c.g_;
+        b_ += c.b_;
+        return *this;
+    }
+
+    color &operator-=(const color &c) {
+        r_ -= c.r_;
+        g_ -= c.g_;
+        b_ -= c.b_;
+        return *this;
+    }
+
+    template <typename T>
+    color operator*(const T &val) const {
+        return color{r_ * val, g_ * val, b_ * val};
+    }
 
    private:
-    const vec &v_;
+    double r_, g_, b_;
 };
-}  // namespace impl
-
-impl::color_cast_impl color_cast(const vec &color) {
-    return impl::color_cast_impl{color};
-}
-
-inline std::ostream &operator<<(std::ostream &os, const vec &color) {
-    return os << color.x() << ' ' << color.y() << ' ' << color.z();
-}
-
-inline std::ostream &operator<<(std::ostream &os, const impl::color_cast_impl &color) {
-    return os << color_cast(color.x()) << ' ' << color_cast(color.y()) << ' ' << color_cast(color.z());
-}
 
 #endif  // COLOR_H_
