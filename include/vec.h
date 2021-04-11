@@ -1,95 +1,35 @@
 #pragma once
 
-#ifndef vec_H_
-#define vec_H_
+#ifndef VEC_H_
+#define VEC_H_
 
 #include "util.h"
 
 struct vec {
    public:
-    vec(double _x, double _y, double _z) : x_{_x}, y_{_y}, z_{_z} {}
-    vec() : vec{0, 0, 0} {}
-    double x() const { return x_; }
-    double y() const { return y_; }
-    double z() const { return z_; }
-    double length2() const {
-        return sqr(x_) + sqr(y_) + sqr(z_);
-    }
-    double length() const {
-        return std::sqrt(length2());
-    }
-    vec unit() const {
-        return *this / length();
-    }
-    vec &unitize() {
-        double len = length();
-        this->x_ /= len;
-        this->y_ /= len;
-        this->z_ /= len;
-        return *this;
-    }
-    double &operator[](size_t index) {
-        switch (index) {
-            case 0:
-                return x_;
-            case 1:
-                return y_;
-            case 2:
-                return z_;
-            default:
-                throw "now such element";
-        }
-    }
-    vec operator+(const vec &v) const {
-        return vec{x_ + v.x_, y_ + v.y_, z_ + v.z_};
-    }
-    vec operator-(const vec &v) const {
-        return vec{x_ - v.x_, y_ - v.y_, z_ - v.z_};
-    }
-    vec operator-() const {
-        return vec{-x_, -y_, -z_};
-    }
-    vec operator^(const vec &v) const {
-        return vec{y_ * v.z_ - z_ * v.y_, z_ * v.x_ - x_ * v.z_, x_ * v.y_ - y_ * v.x_};
-    }
-    double operator*(const vec &v) const {
-        return x_ * v.x_ + y_ * v.y_ + z_ * v.z_;
-    }
-    vec &operator+=(const vec &v) {
-        x_ += v.x_;
-        y_ += v.y_;
-        z_ += v.z_;
-        return *this;
-    }
-    vec &operator-=(const vec &v) {
-        x_ -= v.x_;
-        y_ -= v.y_;
-        z_ -= v.z_;
-        return *this;
-    }
+    vec();
+    vec(double _x, double _y, double _z);
 
-    template <typename Tp>
-    vec operator*(const Tp &t) const {
-        return vec{x_ * t, y_ * t, z_ * t};
-    }
-    template <typename Tp>
-    vec operator/(const Tp &t) const {
-        return vec{x_ / t, y_ / t, z_ / t};
-    }
-    template <typename Tp>
-    vec &operator*=(const Tp &t) {
-        x_ *= t;
-        y_ *= t;
-        z_ *= t;
-        return *this;
-    }
-    template <typename Tp>
-    vec &operator/=(const Tp &t) {
-        x_ /= t;
-        y_ /= t;
-        z_ /= t;
-        return *this;
-    }
+    double x() const;
+    double y() const;
+    double z() const;
+    double length2() const;
+    double length() const;
+    vec unit() const;
+    vec operator-() const;
+    vec operator+(const vec &v) const;
+    vec operator-(const vec &v) const;
+    vec operator^(const vec &v) const;
+    vec operator*(double x) const;
+    vec operator/(double x) const;
+    double operator*(const vec &v) const;
+
+    double &operator[](size_t index);
+    vec &operator+=(const vec &v);
+    vec &operator-=(const vec &v);
+    vec &operator*=(double x);
+    vec &operator/=(double x);
+    vec &unitize();
 
    private:
     double x_;
@@ -97,15 +37,10 @@ struct vec {
     double z_;
 };
 
-template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-inline vec operator*(T val, const vec &t) {
-    return vec{val * t.x(), val * t.y(), val * t.z()};
-}
-
-inline std::ostream &operator<<(std::ostream &os, const vec &v) {
-    return os << v.x() << ' ' << v.y() << ' ' << v.z();
-}
-
 using point = vec;
 
-#endif  // vec_H_
+vec operator*(double val, const vec &t);
+
+std::ostream &operator<<(std::ostream &os, const vec &v);
+
+#endif  // VEC_H_

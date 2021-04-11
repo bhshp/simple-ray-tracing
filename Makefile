@@ -1,36 +1,26 @@
-src = $(wildcard ./src/*.cc)
-header = $(wildcard ./include/)
-target = main.out
-temp_image = ./target/out.ppm
-target_image = ./target/out.jpg
+src_dir = ./src
+target_dir = ./target
+
+src = $(wildcard $(src_dir)/*.cc)
+target = $(target_dir)/main.out
+
+obj = $(patsubst $(src_dir)/%.cc,$(target_dir)/%.o,$(src))
+
+temp_image = $(target_dir)/out.ppm
+target_image = $(target_dir)/out.jpg
+
+# python -c "import cv2;cv2.imwrite('$(target_image)', cv2.imread('$(temp_image)'))" && code ./$(target_image)
+# date +"%F %T"
 
 CC = g++
 CCFLAGS = -std=c++17 -O2 -Wall -Wextra -Werror -pedantic-errors
 
-$(target): $(src)
-	$(CC) $(src) -I$(header) -o $(target) $(CCFLAGS)
-
-.PHONY: clean
+all: $(target)
+$(target): $(obj)
+	$(CC) -o $@ $^ $(CCFLAGS)
+$(target_dir)/%.o: $(src_dir)/%.cc
+	$(CC) -c $^ -I./include -o $@ $(CCFLAGS)
 clean:
-ifndef keep-temp
-	rm -rf ${temp_image}
-endif
-	rm -rf $(target) ${target_image}
+	rm -rf $(obj)
 
-.PHONY: all
-all:
-	make clean
-	make
-	time -f "%E elapsed." ./$(target)
-	python -c "import cv2;cv2.imwrite('$(target_image)', cv2.imread('$(temp_image)'))" && code ./$(target_image)
-ifndef keep-temp
-	rm -rf $(temp_image)
-endif
-	rm -rf $(target)
-	date +"%F %T"
-
-.PHONY: new
-new:
-	make all
-	rm -rf ./target/current.jpg
-	cp ./target/out.jpg ./target/current.jpg
+.PHONY: all clean

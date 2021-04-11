@@ -7,15 +7,13 @@
 
 struct ray {
    public:
-    ray(const point &p, const vec &v) : origin_{p}, direction_{v} {}
-    ray() : origin_{}, direction_{} {}
+    ray();
+    ray(const point &p, const vec &v);
 
-    point origin() const { return origin_; }
-    vec direction() const { return direction_; }
+    point origin() const;
+    vec direction() const;
 
-    point at(double t) const {
-        return origin_ + direction_ * t;
-    }
+    point at(double t) const;
 
    private:
     point origin_;

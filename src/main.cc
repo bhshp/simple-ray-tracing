@@ -4,7 +4,7 @@
 
 #include "compact.h"
 
-color ray_color(const ray& r, const hittable& world) {
+inline color ray_color(const ray& r, const hittable& world) {
     if (result_type rec = world.hit(r, 0, inf); rec.has_value()) {
         return 0.5 * (rec->normal() + color{1, 1, 1});
     }
