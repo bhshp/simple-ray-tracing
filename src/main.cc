@@ -2,6 +2,7 @@
 #include <fstream>   // std::ofstream
 #include <iostream>  // std::endl
 
+#include "camera.h"
 #include "common.h"
 
 color ray_color(const ray& r, const hittable& world) {
@@ -14,21 +15,34 @@ color ray_color(const ray& r, const hittable& world) {
 }
 
 int main() {
+    camera cam;
+
+    const int width = cam.width();
+    const int height = cam.height();
+    const int samples = 100;
+
     std::ofstream out(path);
     out << "P3\n"
-        << image_width << ' ' << image_height << "\n255\n";
+        << cam.width() << ' ' << cam.height() << "\n255\n";
 
     // World
     hittable_list world;
     world.push_back(std::make_shared<sphere>(point{0, 0, -1}, 0.5));       // sphere
     world.push_back(std::make_shared<sphere>(point{0, -100.5, -1}, 100));  // ground
 
-    for (int i = image_height - 1; i >= 0; i--) {
-        for (int j = 0; j < image_width; j++) {
-            double u = double(j) / (image_width - 1),
-                   v = double(i) / (image_height - 1);
-            out << ray_color(ray{origin, lower_left + u * horizontal + v * vertical - origin}, world) << '\n';
+    for (int i = height - 1; i >= 0; i--) {
+        for (int j = 0; j < width; j++) {
+            color pixel;
+            for (int k = 0; k < samples; k++) {
+                double u = (i + random_double()) / (height - 1);
+                double v = (j + random_double()) / (width - 1);
+                ray r = cam.get_ray(u, v);
+                pixel += ray_color(r, world);
+            }
+            out << sample_cast(pixel, samples) << '\n';
         }
     }
+    out.flush();
+    out.close();
     return 0;
 }

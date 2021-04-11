@@ -7,22 +7,10 @@
 
 #include "vec.h"
 
-inline int color_cast(double c) {
-    if (c <= 0) {
-        return 0;
-    } else if (c >= 1.0) {
-        return 255;
-    }
-    return static_cast<int>(c * 256.0);
-}
-
 struct color {
    public:
-    friend inline std::ostream &operator<<(std::ostream &os, const color &c) {
-        return os << color_cast(c.r_) << ' ' << color_cast(c.g_) << ' ' << color_cast(c.b_);
-    }
-
     color(double r, double g, double b) : r_(r), g_(g), b_(b) {}
+    color() : color{0.0, 0.0, 0.0} {}
     color(const vec &v) : r_{v.x()}, g_{v.y()}, b_{v.z()} {}
 
     double r() const { return r_; }
@@ -41,6 +29,14 @@ struct color {
         return color{-r_, -g_, -b_};
     }
 
+    color operator*(double x) const {
+        return color{r_ * x, g_ * x, b_ * x};
+    }
+
+    color operator/(double x) const {
+        return color{r_ / x, g_ / x, b_ / x};
+    }
+
     color &operator+=(const color &c) {
         r_ += c.r_;
         g_ += c.g_;
@@ -52,6 +48,20 @@ struct color {
         r_ -= c.r_;
         g_ -= c.g_;
         b_ -= c.b_;
+        return *this;
+    }
+
+    color &operator*=(double x) {
+        r_ *= x;
+        g_ *= x;
+        b_ *= x;
+        return *this;
+    }
+
+    color &operator/=(double x) {
+        r_ /= x;
+        g_ /= x;
+        b_ /= x;
         return *this;
     }
 

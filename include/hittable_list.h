@@ -34,11 +34,9 @@ void hittable_list::push_back(const std::shared_ptr<hittable> &object) {
 
 std::optional<hit_record> hittable_list::hit(const ray &r, double t_min, double t_max) const {
     std::optional<hit_record> result;
-    bool hit_anything = false;
     double closest_so_far = t_max;
     for (const std::shared_ptr<hittable> &o : list_) {
         if (std::optional<hit_record> temp = o->hit(r, t_min, closest_so_far); temp.has_value()) {
-            hit_anything = true;
             closest_so_far = temp->t();
             result = temp;
         }

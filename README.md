@@ -12,6 +12,8 @@ Python: python3 with cv2(opencv-python) installed
 
 Simply run `make all -s` on a Linux shell
 
+`make new -s` can generate new `current.jpg`
+
 ## Current Status
 
 ![Current Status](target/current.jpg)
