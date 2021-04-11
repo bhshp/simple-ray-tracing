@@ -3,9 +3,9 @@
 #ifndef HITTABLE_H_
 #define HITTABLE_H_
 
-#include <optional>
+#include <optional>  // std::optional
 
-#include "hit_record.h"
+#include "hit_record.h"  // hit_record
 
 class hittable {
    public:

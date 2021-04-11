@@ -3,8 +3,7 @@
 #ifndef HIT_RECORD_H_
 #define HIT_RECORD_H_
 
-#include "ray.h"
-#include "vec.h"
+#include "vec.h"  // point vec
 
 struct hit_record {
    public:

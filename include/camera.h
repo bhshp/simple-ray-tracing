@@ -3,8 +3,8 @@
 #ifndef CAMERA_H_
 #define CAMERA_H_
 
-#include "ray.h"
-#include "vec.h"
+#include "ray.h"  // ray
+#include "vec.h"  // vec
 
 struct camera {
    public:

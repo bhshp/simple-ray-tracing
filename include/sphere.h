@@ -5,9 +5,11 @@
 
 #include <optional>
 
-#include "hittable.h"
-#include "ray.h"
-#include "vec.h"
+#include "hit_record.h"  // hit_record
+#include "hittable.h"    // hittable
+#include "ray.h"         // ray
+#include "util.h"        // sqr
+#include "vec.h"         // point vec
 
 struct sphere : public hittable {
    public:

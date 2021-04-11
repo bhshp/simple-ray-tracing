@@ -3,18 +3,9 @@
 #ifndef vec_H_
 #define vec_H_
 
-#include <cmath>     // std::sqrt
-#include <iostream>  // std::ostream
-
-inline double sqr(double x) {
-    return x * x;
-}
+#include "util.h"
 
 struct vec {
-    friend inline std::ostream &operator<<(std::ostream &os, const vec &v) {
-        return os << v.x_ << ' ' << v.y_ << ' ' << v.z_;
-    }
-
    public:
     vec(double _x, double _y, double _z) : x_{_x}, y_{_y}, z_{_z} {}
     vec() : vec{0, 0, 0} {}
@@ -106,9 +97,13 @@ struct vec {
     double z_;
 };
 
-template <typename T>
-vec operator*(T val, const vec &t) {
+template <typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+inline vec operator*(T val, const vec &t) {
     return vec{val * t.x(), val * t.y(), val * t.z()};
+}
+
+inline std::ostream &operator<<(std::ostream &os, const vec &v) {
+    return os << v.x() << ' ' << v.y() << ' ' << v.z();
 }
 
 using point = vec;

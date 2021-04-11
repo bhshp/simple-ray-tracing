@@ -5,7 +5,8 @@
 
 #include <iostream>  // std::ostream
 
-#include "vec.h"
+#include "util.h"  // color_cast
+#include "vec.h"   // constructor color(const vec&)
 
 struct color {
    public:
@@ -73,5 +74,30 @@ struct color {
    private:
     double r_, g_, b_;
 };
+
+inline color operator+(const color &c, const vec &v) {
+    return color{c.r() + v.x(), c.g() + v.y(), c.b() + v.z()};
+}
+
+inline color operator+(const vec &v, const color &c) {
+    return c + v;
+}
+
+template <typename T>
+inline color operator*(T val, const color &t) {
+    return t * val;
+}
+
+inline std::ostream &operator<<(std::ostream &os, const color &c) {
+    return os << color_cast(c.r()) << ' ' << color_cast(c.g()) << ' ' << color_cast(c.b());
+}
+
+inline color mix(const color &a, const color &b, double alpha) {
+    return (1.0 - alpha) * a + alpha * b;
+}
+
+inline color sample_cast(const color &c, int samples) {
+    return c / samples;
+}
 
 #endif  // COLOR_H_
