@@ -55,6 +55,8 @@ vec random_in_hemisphere(const vec &v);
 
 vec reflect(const vec &v, const vec &n);
 
+vec refract(const vec &uv, const vec &n, double ratio);
+
 // Implementation
 
 inline vec::vec(double _x, double _y, double _z) : x_{_x}, y_{_y}, z_{_z} {}
@@ -192,6 +194,13 @@ inline vec random_in_hemisphere(const vec &normal) {
 
 inline vec reflect(const vec &v, const vec &n) {
     return v - (2 * v * n) * n;
+}
+
+inline vec refract(const vec &uv, const vec &n, double ratio) {
+    double cos_theta = std::min(-uv * n, 1.0);
+    vec r_vertical = ratio * (uv + cos_theta * n);
+    vec r_parallel = -std::sqrt(1 - r_vertical.length2()) * n;
+    return r_vertical + r_parallel;
 }
 
 #endif  // VEC_H_

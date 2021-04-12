@@ -18,12 +18,23 @@ struct progress_bar {
     void complete();
 
    private:
-    std::string bar(int a, int b) {
-        return std::string(a, '*').append(std::string(b - a, ' '));
+    std::string to_2f(int x) {
+        std::string res = std::to_string(x / 10);
+        res.push_back('.');
+        res.push_back(static_cast<char>('0' + x % 10));
+        res.push_back('%');
+        if (res.size() < 6) {
+            res.append(std::string(6 - res.size(), ' '));
+        }
+        return res;
     }
 
-    double percentage(double a, double b) {
-        return 100.0 * a / b;
+    std::string bar(int a) {
+        return std::string(a, '*').append(std::string(bar_length - a, ' '));
+    }
+
+    int percentage(int a) {
+        return 1000 * a / num_;
     }
 
     const int bar_length = 100;
@@ -37,20 +48,14 @@ progress_bar::progress_bar(std::ostream& os, int num) : os_{os}, num_{num} { os_
 void progress_bar::output(int index) {
     using namespace std::chrono;
     using namespace std::chrono_literals;
-    os_.precision(2);
-    time_point begin = high_resolution_clock::now();
-    double per = percentage(num_ - index, num_);
-    int block = static_cast<int>(per);
-    os_ << '\r' << std::right << std::setw(4) << per << "% [" << bar(block, bar_length)
-        << "] current: " << num_ - index << '/' << num_ << std::flush;
-    time_point end = high_resolution_clock::now();
-    if (end - begin < 50ms) {
-        std::this_thread::sleep_for(50ms - (end - begin));
-    }
+
+    int per = percentage(num_ - index);
+    int block = static_cast<int>(1e-3 * per * bar_length);
+    os_ << '\r' << "[" << bar(block) << "] " << to_2f(per) << ' ' << num_ - index << '/' << num_ << std::flush;
 }
 
 void progress_bar::complete() {
-    os_ << "\rComplete! " << std::string(bar_length + 5, ' ') << std::endl;
+    os_ << "\rComplete!  " << std::string(bar_length + 2 * std::to_string(num_).length(), ' ') << std::endl;
 }
 
 #endif  // PROGRESS_BAR_H_

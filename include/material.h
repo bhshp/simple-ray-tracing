@@ -33,20 +33,6 @@ struct lambertian : public material {
     color albedo_;
 };
 
-lambertian::lambertian(const color &c) : albedo_{c} {}
-
-lambertian::~lambertian() {}
-
-color lambertian::albedo() const { return albedo_; }
-
-scatter_result_type lambertian::scatter(const ray &, const hit_record &rec) const {
-    vec scatter_direction = rec.normal() + random_in_unit_sphere().unit();
-    if (scatter_direction.near_zero()) {
-        scatter_direction = rec.normal();
-    }
-    return std::make_optional<std::pair<color, ray>>(std::make_pair(albedo(), ray{rec.p(), scatter_direction}));
-}
-
 struct metal : public material {
    public:
     metal(const color &a, double f = 1.0);
@@ -61,6 +47,33 @@ struct metal : public material {
     double fuzz_;
 };
 
+struct dielectric : public material {
+   public:
+    dielectric(double refraction);
+    virtual ~dielectric();
+
+    virtual scatter_result_type scatter(const ray &, const hit_record &rec) const override;
+
+   private:
+    double refraction_;
+};
+
+// Implementation
+
+lambertian::lambertian(const color &c) : albedo_{c} {}
+
+lambertian::~lambertian() {}
+
+color lambertian::albedo() const { return albedo_; }
+
+scatter_result_type lambertian::scatter(const ray &, const hit_record &rec) const {
+    vec scatter_direction = rec.normal() + random_in_unit_sphere().unit();
+    if (scatter_direction.near_zero()) {
+        scatter_direction = rec.normal();
+    }
+    return std::make_optional<std::pair<color, ray>>(std::make_pair(albedo(), ray{rec.p(), scatter_direction}));
+}
+
 metal::metal(const color &a, double f) : albedo_{a}, fuzz_{f} {}
 
 metal::~metal() {}
@@ -74,6 +87,16 @@ scatter_result_type metal::scatter(const ray &in, const hit_record &rec) const {
         return std::nullopt;
     }
     return std::make_optional<std::pair<color, ray>>(std::make_pair(albedo(), scattered));
+}
+
+dielectric::dielectric(double refraction) : refraction_{refraction} {}
+
+dielectric::~dielectric() {}
+
+scatter_result_type dielectric::scatter(const ray &in, const hit_record &rec) const {
+    double ratio = rec.front_face() ? (1.0 / refraction_) : refraction_;
+    vec refracted = refract(in.direction().unit(), rec.normal(), ratio);
+    return std::make_optional<std::pair<color, ray>>(std::make_pair(color{1.0, 1.0, 1.0}, ray{rec.p(), refracted}));
 }
 
 #endif  // MATERIAL_H_
