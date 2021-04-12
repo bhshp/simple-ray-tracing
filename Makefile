@@ -14,7 +14,7 @@ CCFLAGS = -std=c++17 -Wall -Wextra -Werror -pedantic-errors -I./include -O3
 
 src = $(wildcard $(src_dir)/*.cc)
 
-all: $(target_image) $(target)
+all: $(target_image)
 	code $(target_image)
 
 $(target_image): $(target)

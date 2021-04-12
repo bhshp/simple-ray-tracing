@@ -49,7 +49,7 @@ scatter_result_type lambertian::scatter(const ray &, const hit_record &rec) cons
 
 struct metal : public material {
    public:
-    metal(const color &a);
+    metal(const color &a, double f = 1.0);
     virtual ~metal();
 
     color albedo() const;
@@ -58,9 +58,10 @@ struct metal : public material {
 
    private:
     color albedo_;
+    double fuzz_;
 };
 
-metal::metal(const color &a) : albedo_{a} {}
+metal::metal(const color &a, double f) : albedo_{a}, fuzz_{f} {}
 
 metal::~metal() {}
 
@@ -68,7 +69,7 @@ color metal::albedo() const { return albedo_; }
 
 scatter_result_type metal::scatter(const ray &in, const hit_record &rec) const {
     vec reflected = reflect(in.direction().unit(), rec.normal());
-    ray scattered{rec.p(), reflected};
+    ray scattered{rec.p(), reflected + fuzz_ * random_in_unit_sphere()};
     if (scattered.direction() * rec.normal() <= 0) {
         return std::nullopt;
     }

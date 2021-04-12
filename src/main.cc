@@ -1,8 +1,10 @@
 #include <fstream>   // std::ofstream
 #include <iostream>  // std::endl
 #include <memory>    // std::make_shared
+#include <string>    // std::string
 
 #include "compact.h"
+#include "progress_bar.h"
 
 inline color ray_color(const ray& r, const hittable& world, int depth) {
     if (depth <= 0) {
@@ -34,8 +36,8 @@ int main() {
     // Materials
     std::shared_ptr<lambertian> material_ground = std::make_shared<lambertian>(color{0.8, 0.8, 0.0});
     std::shared_ptr<lambertian> material_center = std::make_shared<lambertian>(color{0.7, 0.3, 0.3});
-    std::shared_ptr<metal> material_left = std::make_shared<metal>(color{0.8, 0.8, 0.8});
-    std::shared_ptr<metal> material_right = std::make_shared<metal>(color{0.8, 0.6, 0.2});
+    std::shared_ptr<metal> material_left = std::make_shared<metal>(color{0.8, 0.8, 0.8}, 0.3);
+    std::shared_ptr<metal> material_right = std::make_shared<metal>(color{0.8, 0.6, 0.2}, 1.0);
 
     // World
     hittable_list world;
@@ -44,7 +46,10 @@ int main() {
     world.push_back(std::make_shared<sphere>(point{-1, 0, -1}, 0.5, material_left));
     world.push_back(std::make_shared<sphere>(point{1, 0, -1}, 0.5, material_right));
 
+    progress_bar bar{std::cerr, height};
+
     for (int i = height - 1; i >= 0; i--) {
+        bar.output(i);
         for (int j = 0; j < width; j++) {
             color pixel;
             for (int k = 0; k < samples; k++) {
@@ -56,6 +61,7 @@ int main() {
             out << sample_cast(pixel, samples) << '\n';
         }
     }
+    bar.complete();
     out.flush();
     out.close();
     return 0;

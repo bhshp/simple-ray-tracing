@@ -21,7 +21,7 @@ struct camera {
 
     const double aspect_ratio = 1.0 * width_ratio / height_ratio;
 
-    const int image_width = 400;
+    const int image_width = 1600;
     const int image_height = static_cast<int>(1.0 * image_width / aspect_ratio);
 
     const double viewport_height = 2.0;
