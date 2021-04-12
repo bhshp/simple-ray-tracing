@@ -16,8 +16,18 @@ CC = g++
 CCFLAGS = -std=c++17 -O2 -Wall -Wextra -Werror -pedantic-errors
 
 all: $(target)
-$(target): $(obj)
-	$(CC) -o $@ $^ $(CCFLAGS)
+$(target):  $(target_dir)/main.o \
+			$(target_dir)/camera.o \
+			$(target_dir)/sphere.o \
+			$(target_dir)/hittable_list.o \
+			$(target_dir)/hittable.o \
+			$(target_dir)/hit_record.o \
+			$(target_dir)/ray.o \
+			$(target_dir)/color.o \
+			$(target_dir)/vec.o \
+			$(target_dir)/util.o \
+
+	$(CC) -o $@ $^
 $(target_dir)/%.o: $(src_dir)/%.cc
 	$(CC) -c $^ -I./include -o $@ $(CCFLAGS)
 clean:

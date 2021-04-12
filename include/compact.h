@@ -17,6 +17,6 @@
 using result_type = std::optional<hit_record>;
 
 // Initialize And Config
-const char *const path = "./target/out.ppm";
+extern const char *const path = "./target/out.ppm";
 
 #endif  // COMMON_H_

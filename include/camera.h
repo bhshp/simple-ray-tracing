@@ -4,7 +4,7 @@
 #define CAMERA_H_
 
 #include "ray.h"  // ray
-#include "vec.h"  // vec
+#include "vec.h"  // vec point
 
 struct camera {
    public:

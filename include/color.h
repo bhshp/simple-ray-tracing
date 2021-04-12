@@ -47,4 +47,5 @@ std::ostream &operator<<(std::ostream &os, const color &c);
 
 color mix(const color &a, const color &b, double alpha);
 color sample_cast(const color &c, int samples);
+
 #endif  // COLOR_H_

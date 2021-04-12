@@ -5,8 +5,8 @@
 #include <random>
 
 // Const Numbers
-const double inf = std::numeric_limits<double>::max() / 2;
-const double pi = std::acos(-1.0);
+extern const double inf = std::numeric_limits<double>::max() / 2;
+extern const double pi = std::acos(-1.0);
 
 // Util Functions
 double sqr(double x);
