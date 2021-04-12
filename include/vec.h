@@ -12,6 +12,7 @@ struct vec {
     vec();
     vec(double _x, double _y, double _z);
 
+    bool near_zero() const;
     double x() const;
     double y() const;
     double z() const;
@@ -33,6 +34,9 @@ struct vec {
     vec &operator/=(double x);
     vec &unitize();
 
+    static vec random();
+    static vec random(double min, double max);
+
    private:
     double x_;
     double y_;
@@ -45,11 +49,21 @@ vec operator*(double val, const vec &t);
 
 std::ostream &operator<<(std::ostream &os, const vec &v);
 
+vec random_in_unit_sphere();
 
+vec random_in_hemisphere(const vec &v);
+
+vec reflect(const vec &v, const vec &n);
+
+// Implementation
 
 inline vec::vec(double _x, double _y, double _z) : x_{_x}, y_{_y}, z_{_z} {}
 
 inline vec::vec() : vec{0, 0, 0} {}
+
+inline bool vec::near_zero() const {
+    return std::fabs(x()) < eps && std::fabs(y()) < eps && std::fabs(z()) < eps;
+}
 
 inline double vec::x() const { return x_; }
 
@@ -146,12 +160,38 @@ inline vec &vec::unitize() {
     return *this;
 }
 
+inline vec vec::random() {
+    return vec::random(0.0, 1.0);
+}
+
+inline vec vec::random(double min, double max) {
+    return vec{random_double(min, max), random_double(min, max), random_double(min, max)};
+}
+
 inline vec operator*(double val, const vec &t) {
     return t * val;
 }
 
 inline std::ostream &operator<<(std::ostream &os, const vec &v) {
     return os << v.x() << ' ' << v.y() << ' ' << v.z();
+}
+
+inline vec random_in_unit_sphere() {
+    do {
+        vec p = vec::random(-1, 1);
+        if (p.length2() < 1) {
+            return p;
+        }
+    } while (true);
+}
+
+inline vec random_in_hemisphere(const vec &normal) {
+    vec in_unit_sphere = random_in_unit_sphere();
+    return normal * in_unit_sphere > 0 ? in_unit_sphere : -in_unit_sphere;
+}
+
+inline vec reflect(const vec &v, const vec &n) {
+    return v - (2 * v * n) * n;
 }
 
 #endif  // VEC_H_

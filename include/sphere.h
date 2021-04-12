@@ -4,6 +4,7 @@
 #define SPHERE_H_
 
 #include <cmath>
+#include <memory>
 #include <optional>
 
 #include "hit_record.h"
@@ -14,28 +15,36 @@
 struct sphere : public hittable {
    public:
     sphere();
-    sphere(const point& center, double r);
+    sphere(const point& center, double r, const std::shared_ptr<material>& m = nullptr);
     ~sphere();
 
     point center() const;
     double radius() const;
+    std::shared_ptr<material> mat() const;
 
     virtual std::optional<hit_record> hit(const ray& r, double t_min, double t_max) const override;
 
    private:
     point center_;
     double radius_;
+    std::shared_ptr<material> mat_;
 };
 
 inline sphere::sphere() {}
 
-inline sphere::sphere(const point& center, double r) : center_(center), radius_(r) {}
+inline sphere::sphere(const point& center,
+                      double r,
+                      const std::shared_ptr<material>& mat) : center_{center},
+                                                              radius_{r},
+                                                              mat_{mat} {}
 
 inline sphere::~sphere() {}
 
 inline point sphere::center() const { return center_; }
 
 inline double sphere::radius() const { return radius_; }
+
+std::shared_ptr<material> sphere::mat() const { return mat_; }
 
 inline std::optional<hit_record> sphere::hit(const ray& r, double t_min, double t_max) const {
     vec oc = r.origin() - center();
@@ -56,11 +65,11 @@ inline std::optional<hit_record> sphere::hit(const ray& r, double t_min, double 
     }
     point p = r.at(root);
     vec normal = (p - center()) / radius();
-    bool front_face = (r.direction() * normal) < 0;
+    bool front_face = (r.direction() * normal) <= 0;
     if (!front_face) {
         normal = -normal;
     }
-    return std::make_optional<hit_record>(root, p, normal, front_face);
+    return std::make_optional<hit_record>(root, p, normal, front_face, mat());
 }
 
 #endif  // SPHERE_H_

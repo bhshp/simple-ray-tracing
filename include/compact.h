@@ -8,13 +8,14 @@
 #include "hit_record.h"
 #include "hittable.h"
 #include "hittable_list.h"
+#include "material.h"
 #include "ray.h"
 #include "sphere.h"
 #include "util.h"
 #include "vec.h"
 
 // Alias
-using result_type = std::optional<hit_record>;
+using hit_result_type = std::optional<hit_record>;
 
 // Initialize And Config
 extern const char *const path = "./target/out.ppm";

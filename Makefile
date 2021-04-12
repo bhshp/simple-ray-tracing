@@ -5,18 +5,22 @@ target = $(target_dir)/main.out
 
 temp_image = $(target_dir)/out.ppm
 target_image = $(target_dir)/out.jpg
-
+current_image = $(target_dir)/current.jpg
 # 
 # date +"%F %T"
 
-CC = g++
-CCFLAGS = -std=c++17 -Wall -Wextra -Werror -pedantic-errors -I./include -O2
+CC = clang++
+CCFLAGS = -std=c++17 -Wall -Wextra -Werror -pedantic-errors -I./include -O3
 
 src = $(wildcard $(src_dir)/*.cc)
 
-all: $(target)
+all: $(target_image) $(target)
+	code $(target_image)
+
+$(target_image): $(target)
 	$(target)
-	python -c "import cv2;cv2.imwrite('$(target_image)', cv2.imread('$(temp_image)'))" && code $(target_image)
+	python -c "import cv2;cv2.imwrite('$(target_image)', cv2.imread('$(temp_image)'))"
+
 $(target):
 	$(CC) -o $(target) $(src_dir)/main.cc $^ $(CCFLAGS)
 
@@ -25,7 +29,8 @@ clean:
 
 new:
 	$(RM) $(target_dir)/current.jpg
-	make all
+	make $(target_image)
 	mv $(target_dir)/out.jpg $(target_dir)/current.jpg
+	code $(current_image)
 
 .PHONY: all clean new

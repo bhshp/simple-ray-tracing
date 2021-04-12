@@ -28,6 +28,8 @@ struct color {
 
     color operator/(double x) const;
 
+    color operator%(const color &c) const;
+
     color &operator+=(const color &c);
 
     color &operator-=(const color &c);
@@ -80,6 +82,10 @@ inline color color::operator/(double x) const {
     return color{r_ / x, g_ / x, b_ / x};
 }
 
+inline color color::operator%(const color &c) const {
+    return color{r_ * c.r_, g_ * c.g_, b_ * c.b_};
+}
+
 inline color &color::operator+=(const color &c) {
     r_ += c.r_;
     g_ += c.g_;
@@ -129,7 +135,9 @@ inline color mix(const color &a, const color &b, double alpha) {
 }
 
 inline color sample_cast(const color &c, int samples) {
-    return c / samples;
+    return color{std::sqrt(c.r() / samples),
+                 std::sqrt(c.g() / samples),
+                 std::sqrt(c.b() / samples)};
 }
 
 #endif  // COLOR_H_
