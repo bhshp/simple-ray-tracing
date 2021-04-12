@@ -14,4 +14,6 @@ class hittable {
     virtual ~hittable();
 };
 
+inline hittable::~hittable() {}
+
 #endif  // HITTABLE_H_

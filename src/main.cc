@@ -18,7 +18,7 @@ int main() {
 
     const int width = cam.width();
     const int height = cam.height();
-    const int samples = 100;
+    const int samples = 10;
 
     std::ofstream out(path);
     out << "P3\n"

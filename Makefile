@@ -1,36 +1,31 @@
 src_dir = ./src
 target_dir = ./target
 
-src = $(wildcard $(src_dir)/*.cc)
 target = $(target_dir)/main.out
-
-obj = $(patsubst $(src_dir)/%.cc,$(target_dir)/%.o,$(src))
 
 temp_image = $(target_dir)/out.ppm
 target_image = $(target_dir)/out.jpg
 
-# python -c "import cv2;cv2.imwrite('$(target_image)', cv2.imread('$(temp_image)'))" && code ./$(target_image)
+# 
 # date +"%F %T"
 
 CC = g++
-CCFLAGS = -std=c++17 -O2 -Wall -Wextra -Werror -pedantic-errors
+CCFLAGS = -std=c++17 -Wall -Wextra -Werror -pedantic-errors -I./include -O2
+
+src = $(wildcard $(src_dir)/*.cc)
 
 all: $(target)
-$(target):  $(target_dir)/main.o \
-			$(target_dir)/camera.o \
-			$(target_dir)/sphere.o \
-			$(target_dir)/hittable_list.o \
-			$(target_dir)/hittable.o \
-			$(target_dir)/hit_record.o \
-			$(target_dir)/ray.o \
-			$(target_dir)/color.o \
-			$(target_dir)/vec.o \
-			$(target_dir)/util.o \
+	$(target)
+	python -c "import cv2;cv2.imwrite('$(target_image)', cv2.imread('$(temp_image)'))" && code $(target_image)
+$(target):
+	$(CC) -o $(target) $(src_dir)/main.cc $^ $(CCFLAGS)
 
-	$(CC) -o $@ $^
-$(target_dir)/%.o: $(src_dir)/%.cc
-	$(CC) -c $^ -I./include -o $@ $(CCFLAGS)
 clean:
-	rm -rf $(obj)
+	$(RM) $(target_dir)/*.o $(target_image) $(target) $(temp_image)
 
-.PHONY: all clean
+new:
+	$(RM) $(target_dir)/current.jpg
+	make all
+	mv $(target_dir)/out.jpg $(target_dir)/current.jpg
+
+.PHONY: all clean new
