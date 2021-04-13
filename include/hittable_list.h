@@ -67,7 +67,13 @@ inline std::optional<aabb> hittable_list::bounding_box(double time_0, double tim
     std::optional<aabb> res;
     for (const std::shared_ptr<hittable> &o : list_) {
         if (std::optional<aabb> bound_res = o->bounding_box(time_0, time_1); bound_res.has_value()) {
-            res = res.has_value() ? surrounding_box(res.value(), bound_res.value()) : bound_res;
+            if (res.has_value()) {
+                res = surrounding_box(res.value(), bound_res.value());
+            } else {
+                res = bound_res.value();
+            }
+        } else {
+            return std::nullopt;
         }
     }
     return res;

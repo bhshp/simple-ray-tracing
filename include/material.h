@@ -9,6 +9,7 @@
 #include "color.h"
 #include "hit_record.h"
 #include "ray.h"
+#include "texture.h"
 #include "vec.h"
 
 struct hit_record;
@@ -23,14 +24,15 @@ struct material {
 struct lambertian : public material {
    public:
     lambertian(const color &c);
+    lambertian(const std::shared_ptr<texture> &a);
     virtual ~lambertian();
 
-    color albedo() const;
+    std::shared_ptr<texture> albedo() const;
 
     virtual scatter_result_type scatter(const ray &, const hit_record &rec) const override;
 
    private:
-    color albedo_;
+    std::shared_ptr<texture> albedo_;
 };
 
 struct metal : public material {
@@ -62,18 +64,21 @@ struct dielectric : public material {
 
 // Implementation
 
-inline lambertian::lambertian(const color &c) : albedo_{c} {}
+inline lambertian::lambertian(const color &c) : albedo_{std::make_shared<solid_color>(c)} {}
+
+inline lambertian::lambertian(const std::shared_ptr<texture> &c) : albedo_{c} {}
 
 inline lambertian::~lambertian() {}
 
-inline color lambertian::albedo() const { return albedo_; }
+inline std::shared_ptr<texture> lambertian::albedo() const { return albedo_; }
 
 inline scatter_result_type lambertian::scatter(const ray &in, const hit_record &rec) const {
     vec scatter_direction = rec.normal() + random_in_unit_sphere().unit();
     if (scatter_direction.near_zero()) {
         scatter_direction = rec.normal();
     }
-    return std::make_optional<std::pair<color, ray>>(std::make_pair(albedo(), ray{rec.p(), scatter_direction, in.time()}));
+    return std::make_optional<std::pair<color, ray>>(std::make_pair(albedo_->value(rec.u(), rec.v(), rec.p()),
+                                                                    ray{rec.p(), scatter_direction, in.time()}));
 }
 
 inline metal::metal(const color &a, double f) : albedo_{a}, fuzz_{f} {}

@@ -101,10 +101,10 @@ std::optional<aabb> moving_sphere::bounding_box(double time_0, double time_1) co
     point second = center(time_1);
     double r = radius();
     vec rad_vec = vec{r, r, r};
-    return surrounding_box(aabb{first - rad_vec,
-                                first + rad_vec},
-                           aabb{second - rad_vec,
-                                second + rad_vec});
+    return std::make_optional<aabb>(surrounding_box(aabb{first - rad_vec,
+                                                         first + rad_vec},
+                                                    aabb{second - rad_vec,
+                                                         second + rad_vec}));
 }
 
 #endif  // MOVING_SPHERE_H_

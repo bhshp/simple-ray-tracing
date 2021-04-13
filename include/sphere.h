@@ -32,6 +32,10 @@ struct sphere : public hittable {
     std::shared_ptr<material> mat_;
 };
 
+std::pair<double, double> get_sphere_uv(const point& p);
+
+// Implementation
+
 inline sphere::sphere() {}
 
 inline sphere::sphere(const point& center,
@@ -71,7 +75,8 @@ inline std::optional<hit_record> sphere::hit(const ray& r, double t_min, double 
     if (!front_face) {
         normal = -normal;
     }
-    return std::make_optional<hit_record>(root, p, normal, front_face, mat());
+    std::pair<double, double> uv = get_sphere_uv(normal);
+    return std::make_optional<hit_record>(root, p, normal, front_face, mat(), uv.first, uv.second);
 }
 
 inline std::optional<aabb> sphere::bounding_box(double, double) const {
@@ -79,6 +84,12 @@ inline std::optional<aabb> sphere::bounding_box(double, double) const {
     vec c = center();
     vec rad_vec{r, r, r};
     return std::make_optional<aabb>(c - rad_vec, c + rad_vec);
+}
+
+inline std::pair<double, double> get_sphere_uv(const point& p) {
+    double theta = std::acos(-p.y());
+    double phi = std::atan2(-p.z(), p.x()) + pi;
+    return {phi / (2 * pi), theta / pi};
 }
 
 #endif  // SPHERE_H_

@@ -3,6 +3,8 @@
 #ifndef COMMON_H_
 #define COMMON_H_
 
+#include "aabb.h"
+#include "bvh_node.h"
 #include "camera.h"
 #include "canvas.h"
 #include "color.h"
@@ -13,6 +15,7 @@
 #include "moving_sphere.h"
 #include "ray.h"
 #include "sphere.h"
+#include "texture.h"
 #include "util.h"
 #include "vec.h"
 

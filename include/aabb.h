@@ -34,10 +34,9 @@ inline bool aabb::hit(const ray &r, double t_min, double t_max) const {
     point origin = r.origin();
     vec direction = r.direction();
     for (int i = 0; i < 3; i++) {
-        double inv = 1.0 / direction[i];
-        double t_0 = (min_[i] - origin[i]) * inv;
-        double t_1 = (max_[i] - origin[i]) * inv;
-        if (inv < 0) {
+        double t_0 = (min_[i] - origin[i]) / direction[i];
+        double t_1 = (max_[i] - origin[i]) / direction[i];
+        if (direction[i] < 0) {
             std::swap(t_0, t_1);
         }
         t_min = std::max(t_min, t_0);

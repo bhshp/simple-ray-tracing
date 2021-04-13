@@ -3,6 +3,7 @@
 #ifndef GENERATOR_H_
 #define GENERATOR_H_
 
+#include "bvh_node.h"
 #include "hittable_list.h"
 
 // Declaration
@@ -15,9 +16,6 @@ hittable_list small_world();
 
 inline hittable_list random_world() {
     hittable_list world;
-
-    std::shared_ptr<lambertian> material_ground = std::make_shared<lambertian>(color{0.8, 0.8, 0.5});
-    world.push_back(std::make_shared<sphere>(point{0, -1000, 0}, 1000, material_ground));
 
     for (int i = -11; i <= 11; i++) {
         for (int j = -11; j <= 11; j++) {
@@ -50,7 +48,16 @@ inline hittable_list random_world() {
     world.push_back(std::make_shared<sphere>(point{-4, 1, 0}, 1.0, std::make_shared<lambertian>(color(0.4, 0.2, 0.1))));
     world.push_back(std::make_shared<sphere>(point{4, 1, 0}, 1.0, std::make_shared<metal>(color(0.7, 0.6, 0.5), 0.0)));
 
-    return world;
+    std::shared_ptr<checker_board_texture> material_ground = std::make_shared<checker_board_texture>(color(0.2, 0.3, 0.1),
+                                                                                                     color(0.9, 0.9, 0.9));
+
+    world.push_back(std::make_shared<sphere>(point{0, -1000, 0}, 1000, std::make_shared<lambertian>(material_ground)));
+
+    hittable_list ret_world;
+
+    ret_world.push_back(std::make_shared<bvh_node>(world, 0.0, 1.0));
+
+    return ret_world;
 }
 
 inline hittable_list small_world() {
