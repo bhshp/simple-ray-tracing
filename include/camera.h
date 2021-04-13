@@ -8,43 +8,51 @@
 
 struct camera {
    public:
-    camera();
+    camera(double aspect_ratio,
+           point look_from = point{0, 0, 0},
+           point look_at = point{0, 0, -1},
+           vec view_up = vec{0, 0, 0},
+           double vertical_field_of_view_degrees = 90.0,
+           double focus_dist = 1.0,
+           double aperture = 0);
 
     ray get_ray(double u, double v);
 
-    int width() const;
-    int height() const;
-
    private:
-    const int width_ratio = 16;
-    const int height_ratio = 9;
-
-    const double aspect_ratio = 1.0 * width_ratio / height_ratio;
-
-    const int image_width = 1600;
-    const int image_height = static_cast<int>(1.0 * image_width / aspect_ratio);
-
-    const double viewport_height = 2.0;
-    const double viewport_width = aspect_ratio * viewport_height;
-    const double focal_length = 1.0;
-
+    double viewport_height_;
+    double viewport_width_;
+    vec w_;
+    vec u_;
+    vec v_;
     point origin_;
-    vec horizontal_;
     vec vertical_;
+    vec horizontal_;
     point lower_left_;
+    double lens_radius_;
 };
 
-inline camera::camera() : origin_{0.0, 0.0, 0.0},
-                          horizontal_{viewport_width, 0.0, 0.0},
-                          vertical_{0.0, viewport_height, 0.0},
-                          lower_left_{origin_ - (0.5 * vertical_) - (0.5 * horizontal_) - vec{0, 0, focal_length}} {}
+inline camera::camera(double aspect_ratio,
+                      point look_from,
+                      point look_at,
+                      vec view_up,
+                      double vertical_field_of_view_degrees,
+                      double focus_dist,
+                      double aperture)
+    : viewport_height_{2.0 * std::tan(deg2rad(vertical_field_of_view_degrees) / 2)},
+      viewport_width_{aspect_ratio * viewport_height_},
+      w_{(look_from - look_at).unit()},
+      u_{(view_up ^ w_).unit()},
+      v_{w_ ^ u_},
+      origin_{look_from},
+      vertical_{focus_dist * viewport_height_ * v_},
+      horizontal_{focus_dist * viewport_width_ * u_},
+      lower_left_{origin_ - (vertical_ * 0.5) - (horizontal_ * 0.5) - focus_dist * w_},
+      lens_radius_{aperture / 2} {}
 
-inline ray camera::get_ray(double u, double v) {
-    return ray{origin_, lower_left_ + (u * vertical_) + (v * horizontal_) - origin_};
+inline ray camera::get_ray(double s, double t) {
+    vec radius = lens_radius_ * random_in_unit_disk();
+    vec offset = u_ * radius.x() + v_ * radius.y();
+    return ray{origin_ + offset, lower_left_ + (s * vertical_) + (t * horizontal_) - origin_ - offset};
 }
-
-inline int camera::width() const { return image_width; }
-
-inline int camera::height() const { return image_height; }
 
 #endif  // CAMERA_H_

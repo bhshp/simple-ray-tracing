@@ -55,18 +55,20 @@ struct dielectric : public material {
     virtual scatter_result_type scatter(const ray &, const hit_record &rec) const override;
 
    private:
+    static double reflectance(double cos, double ratio);
+
     double refraction_;
 };
 
 // Implementation
 
-lambertian::lambertian(const color &c) : albedo_{c} {}
+inline lambertian::lambertian(const color &c) : albedo_{c} {}
 
-lambertian::~lambertian() {}
+inline lambertian::~lambertian() {}
 
-color lambertian::albedo() const { return albedo_; }
+inline color lambertian::albedo() const { return albedo_; }
 
-scatter_result_type lambertian::scatter(const ray &, const hit_record &rec) const {
+inline scatter_result_type lambertian::scatter(const ray &, const hit_record &rec) const {
     vec scatter_direction = rec.normal() + random_in_unit_sphere().unit();
     if (scatter_direction.near_zero()) {
         scatter_direction = rec.normal();
@@ -74,13 +76,13 @@ scatter_result_type lambertian::scatter(const ray &, const hit_record &rec) cons
     return std::make_optional<std::pair<color, ray>>(std::make_pair(albedo(), ray{rec.p(), scatter_direction}));
 }
 
-metal::metal(const color &a, double f) : albedo_{a}, fuzz_{f} {}
+inline metal::metal(const color &a, double f) : albedo_{a}, fuzz_{f} {}
 
-metal::~metal() {}
+inline metal::~metal() {}
 
-color metal::albedo() const { return albedo_; }
+inline color metal::albedo() const { return albedo_; }
 
-scatter_result_type metal::scatter(const ray &in, const hit_record &rec) const {
+inline scatter_result_type metal::scatter(const ray &in, const hit_record &rec) const {
     vec reflected = reflect(in.direction().unit(), rec.normal());
     ray scattered{rec.p(), reflected + fuzz_ * random_in_unit_sphere()};
     if (scattered.direction() * rec.normal() <= 0) {
@@ -89,14 +91,25 @@ scatter_result_type metal::scatter(const ray &in, const hit_record &rec) const {
     return std::make_optional<std::pair<color, ray>>(std::make_pair(albedo(), scattered));
 }
 
-dielectric::dielectric(double refraction) : refraction_{refraction} {}
+inline dielectric::dielectric(double refraction) : refraction_{refraction} {}
 
-dielectric::~dielectric() {}
+inline dielectric::~dielectric() {}
 
-scatter_result_type dielectric::scatter(const ray &in, const hit_record &rec) const {
+inline scatter_result_type dielectric::scatter(const ray &in, const hit_record &rec) const {
     double ratio = rec.front_face() ? (1.0 / refraction_) : refraction_;
-    vec refracted = refract(in.direction().unit(), rec.normal(), ratio);
-    return std::make_optional<std::pair<color, ray>>(std::make_pair(color{1.0, 1.0, 1.0}, ray{rec.p(), refracted}));
+    vec unit_direction = in.direction().unit();
+    double cos_theta = std::min(-unit_direction * rec.normal(), 1.0);
+    double sin_theta = std::sqrt(1.0 - sqr(cos_theta));
+    vec direction = (ratio * sin_theta > 1.0 || reflectance(cos_theta, ratio) > random_double())
+                        ? reflect(unit_direction, rec.normal())
+                        : refract(unit_direction, rec.normal(), ratio);
+    return std::make_optional<std::pair<color, ray>>(std::make_pair(color{1.0, 1.0, 1.0}, ray{rec.p(), direction}));
+}
+
+inline double dielectric::reflectance(double cos, double ratio) {
+    // Schlick approximate
+    double r0 = sqr((1 - ratio) / (1 + ratio));
+    return r0 + (1 - r0) * pow(1 - cos, 5);
 }
 
 #endif  // MATERIAL_H_

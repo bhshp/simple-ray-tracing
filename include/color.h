@@ -49,6 +49,10 @@ std::ostream &operator<<(std::ostream &os, const color &c);
 
 color mix(const color &a, const color &b, double alpha);
 color sample_cast(const color &c, int samples);
+color random_color();
+color random_color(double min, double max);
+
+// Implementation
 
 inline color::color() : color{0.0, 0.0, 0.0} {}
 
@@ -138,6 +142,14 @@ inline color sample_cast(const color &c, int samples) {
     return color{std::sqrt(c.r() / samples),
                  std::sqrt(c.g() / samples),
                  std::sqrt(c.b() / samples)};
+}
+
+inline color random_color() {
+    return random_color(0.0, 1.0);
+}
+
+inline color random_color(double min, double max) {
+    return color{random_double(min, max), random_double(min, max), random_double(min, max)};
 }
 
 #endif  // COLOR_H_

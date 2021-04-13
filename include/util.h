@@ -10,6 +10,7 @@
 // Const Numbers
 extern const double inf;
 extern const double pi;
+extern const double eps;
 
 // Util Functions
 double sqr(double x);

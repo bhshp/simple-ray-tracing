@@ -53,6 +53,8 @@ vec random_in_unit_sphere();
 
 vec random_in_hemisphere(const vec &v);
 
+vec random_in_unit_disk();
+
 vec reflect(const vec &v, const vec &n);
 
 vec refract(const vec &uv, const vec &n, double ratio);
@@ -190,6 +192,15 @@ inline vec random_in_unit_sphere() {
 inline vec random_in_hemisphere(const vec &normal) {
     vec in_unit_sphere = random_in_unit_sphere();
     return normal * in_unit_sphere > 0 ? in_unit_sphere : -in_unit_sphere;
+}
+
+inline vec random_in_unit_disk() {
+    do {
+        vec p{random_double(-1, 1), random_double(-1, 1), 0};
+        if (p.length2() < 1) {
+            return p;
+        }
+    } while (true);
 }
 
 inline vec reflect(const vec &v, const vec &n) {

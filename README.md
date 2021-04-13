@@ -4,9 +4,9 @@ Follow the implementation of [*Ray Tracing In One Weekend*](https://raytracing.g
 
 ## Requirements
 
-C++ standard: c++17 or higher
+C++ standard: c++17
 
-Python: python3 with cv2(opencv-python) installed
+Python: python3 with cv2(pip install opencv-python) installed
 
 ## Run
 

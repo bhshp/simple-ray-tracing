@@ -44,7 +44,7 @@ inline point sphere::center() const { return center_; }
 
 inline double sphere::radius() const { return radius_; }
 
-std::shared_ptr<material> sphere::mat() const { return mat_; }
+inline std::shared_ptr<material> sphere::mat() const { return mat_; }
 
 inline std::optional<hit_record> sphere::hit(const ray& r, double t_min, double t_max) const {
     vec oc = r.origin() - center();
