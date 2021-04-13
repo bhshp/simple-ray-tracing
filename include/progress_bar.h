@@ -47,7 +47,7 @@ inline progress_bar::progress_bar(std::ostream& os, size_t num) : os_{os},
                                                                start_time_{std::chrono::high_resolution_clock::now()} { output(0); }
 
 inline progress_bar::~progress_bar() {
-    os_ << to_length("\rProgress Complete  ", bar_length + 2 * digits_ + 17, false) << std::endl;
+    os_ << to_length("\rProgress Complete  ", bar_length + 2 * digits_ + 26, false) << std::endl;
 }
 
 inline void progress_bar::operator++(int) {

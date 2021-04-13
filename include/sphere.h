@@ -24,6 +24,8 @@ struct sphere : public hittable {
 
     virtual std::optional<hit_record> hit(const ray& r, double t_min, double t_max) const override;
 
+    virtual std::optional<aabb> bounding_box(double time_0, double time_1) const override;
+
    private:
     point center_;
     double radius_;
@@ -70,6 +72,13 @@ inline std::optional<hit_record> sphere::hit(const ray& r, double t_min, double 
         normal = -normal;
     }
     return std::make_optional<hit_record>(root, p, normal, front_face, mat());
+}
+
+inline std::optional<aabb> sphere::bounding_box(double, double) const {
+    double r = radius();
+    vec c = center();
+    vec rad_vec{r, r, r};
+    return std::make_optional<aabb>(c - rad_vec, c + rad_vec);
 }
 
 #endif  // SPHERE_H_

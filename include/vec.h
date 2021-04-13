@@ -26,6 +26,7 @@ struct vec {
     vec operator*(double x) const;
     vec operator/(double x) const;
     double operator*(const vec &v) const;
+    double operator[](size_t index) const;
 
     double &operator[](size_t index);
     vec &operator+=(const vec &v);
@@ -113,6 +114,19 @@ inline vec vec::operator/(double x) const {
 
 inline double vec::operator*(const vec &v) const {
     return x_ * v.x_ + y_ * v.y_ + z_ * v.z_;
+}
+
+inline double vec::operator[](size_t index) const {
+    switch (index) {
+        case 0:
+            return x_;
+        case 1:
+            return y_;
+        case 2:
+            return z_;
+        default:
+            throw "now such element";
+    }
 }
 
 inline double &vec::operator[](size_t index) {

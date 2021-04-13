@@ -68,12 +68,12 @@ inline lambertian::~lambertian() {}
 
 inline color lambertian::albedo() const { return albedo_; }
 
-inline scatter_result_type lambertian::scatter(const ray &, const hit_record &rec) const {
+inline scatter_result_type lambertian::scatter(const ray &in, const hit_record &rec) const {
     vec scatter_direction = rec.normal() + random_in_unit_sphere().unit();
     if (scatter_direction.near_zero()) {
         scatter_direction = rec.normal();
     }
-    return std::make_optional<std::pair<color, ray>>(std::make_pair(albedo(), ray{rec.p(), scatter_direction}));
+    return std::make_optional<std::pair<color, ray>>(std::make_pair(albedo(), ray{rec.p(), scatter_direction, in.time()}));
 }
 
 inline metal::metal(const color &a, double f) : albedo_{a}, fuzz_{f} {}
@@ -84,7 +84,7 @@ inline color metal::albedo() const { return albedo_; }
 
 inline scatter_result_type metal::scatter(const ray &in, const hit_record &rec) const {
     vec reflected = reflect(in.direction().unit(), rec.normal());
-    ray scattered{rec.p(), reflected + fuzz_ * random_in_unit_sphere()};
+    ray scattered{rec.p(), reflected + fuzz_ * random_in_unit_sphere(), in.time()};
     if (scattered.direction() * rec.normal() <= 0) {
         return std::nullopt;
     }
@@ -103,7 +103,7 @@ inline scatter_result_type dielectric::scatter(const ray &in, const hit_record &
     vec direction = (ratio * sin_theta > 1.0 || reflectance(cos_theta, ratio) > random_double())
                         ? reflect(unit_direction, rec.normal())
                         : refract(unit_direction, rec.normal(), ratio);
-    return std::make_optional<std::pair<color, ray>>(std::make_pair(color{1.0, 1.0, 1.0}, ray{rec.p(), direction}));
+    return std::make_optional<std::pair<color, ray>>(std::make_pair(color{1.0, 1.0, 1.0}, ray{rec.p(), direction, in.time()}));
 }
 
 inline double dielectric::reflectance(double cos, double ratio) {

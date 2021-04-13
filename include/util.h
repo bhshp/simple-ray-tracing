@@ -17,6 +17,10 @@ double sqr(double x);
 
 double deg2rad(double deg);
 
+int random_int();
+
+int random_int(int a, int b);
+
 double random_double();
 
 double random_double(double a, double b);
@@ -33,6 +37,11 @@ inline double sqr(double x) {
 
 inline double deg2rad(double deg) {
     return deg / 180.0 * pi;
+}
+
+inline int random_int(int a, int b) {
+    static std::mt19937_64 gen{std::random_device{}()};
+    return std::uniform_int_distribution<int>{a, b}(gen);
 }
 
 inline double random_double() {
