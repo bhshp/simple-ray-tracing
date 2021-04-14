@@ -64,7 +64,7 @@ struct dielectric : public material {
 
 // Implementation
 
-inline lambertian::lambertian(const color &c) : albedo_{std::make_shared<solid_color>(c)} {}
+inline lambertian::lambertian(const color &c) : albedo_{std::make_shared<solid_color_texture>(c)} {}
 
 inline lambertian::lambertian(const std::shared_ptr<texture> &c) : albedo_{c} {}
 

@@ -1,6 +1,7 @@
 #ifndef UTIL_H_
 #define UTIL_H_
 
+#include <cassert>
 #include <cmath>
 #include <limits>
 #include <random>
@@ -26,6 +27,12 @@ double random_double();
 double random_double(double a, double b);
 
 int color_cast(double c);
+
+double clamp(double a, double min, double max);
+
+int clamp(int a, int min, int max);
+
+// Implementations
 
 extern const double inf = std::numeric_limits<double>::infinity();
 extern const double pi = std::acos(-1.0);
@@ -54,12 +61,24 @@ inline double random_double(double a, double b) {
 }
 
 inline int color_cast(double c) {
-    if (c <= 0) {
-        return 0;
-    } else if (c >= 1.0) {
-        return 255;
+    if (c > 0 && c < 1) {
+        return static_cast<int>(c * 256.0);
     }
-    return static_cast<int>(c * 256.0);
+    return c <= 0 ? 0 : 255;
+}
+
+inline double clamp(double a, double min, double max) {
+    if (a > min && a < max) {
+        return a;
+    }
+    return a <= min ? min : max;
+}
+
+inline int clamp(int a, int min, int max) {
+    if (a > min && a < max) {
+        return a;
+    }
+    return a <= min ? min : max;
 }
 
 #endif  // UTIL_H_

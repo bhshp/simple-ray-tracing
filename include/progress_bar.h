@@ -31,7 +31,7 @@ struct progress_bar {
 
     int64_t eta(size_t index);
 
-    const size_t bar_length = 60;
+    const size_t bar_length = 50;
 
     std::ostream& os_;
     size_t num_;

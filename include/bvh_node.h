@@ -17,16 +17,16 @@ struct bvh_node : public hittable {
     bvh_node(std::vector<std::shared_ptr<hittable>> &list,
              size_t begin,
              size_t end,
-             double time_0,
-             double time_1);
+             double time_0 = 0,
+             double time_1 = 0);
 
     bvh_node(std::vector<std::shared_ptr<hittable>> list,
-             double time_0,
-             double time_1);
+             double time_0 = 0,
+             double time_1 = 0);
 
     bvh_node(const hittable_list &list,
-             double time_0,
-             double time_1);
+             double time_0 = 0,
+             double time_1 = 0);
 
     virtual ~bvh_node();
 
@@ -39,6 +39,10 @@ struct bvh_node : public hittable {
     std::shared_ptr<hittable> right_;
     aabb box_;
 };
+
+hittable_list bvh(const hittable_list &list, double a = 0, double b = 0);
+
+// Implementation
 
 inline bvh_node::bvh_node() {}
 
@@ -110,6 +114,12 @@ inline std::optional<hit_record> bvh_node::hit(const ray &r, double t_min, doubl
 
 inline std::optional<aabb> bvh_node::bounding_box(double, double) const {
     return std::make_optional<aabb>(box_);
+}
+
+inline hittable_list bvh(const hittable_list &list, double a, double b) {
+    hittable_list world;
+    world.push_back(std::make_shared<bvh_node>(list, a, b));
+    return world;
 }
 
 #endif  // BVH_H_

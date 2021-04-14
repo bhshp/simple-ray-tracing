@@ -8,7 +8,7 @@
 #endif
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "./../third-party/stb_image.h"
 
 #ifdef _MSC_VER
 #pragma warning(pop)

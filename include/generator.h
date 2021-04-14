@@ -14,6 +14,10 @@ hittable_list small_world();
 
 hittable_list two_spheres();
 
+hittable_list two_perlin_spheres();
+
+hittable_list earth();
+
 // Implementation
 
 inline hittable_list random_world() {
@@ -89,12 +93,28 @@ inline hittable_list two_spheres() {
     hittable_list world;
     world.push_back(std::make_shared<sphere>(point{0, 10, 0}, 10, std::make_shared<lambertian>(checker_board)));
     world.push_back(std::make_shared<sphere>(point{0, -10, 0}, 10, std::make_shared<lambertian>(checker_board)));
+    return world;
+}
 
-    hittable_list ret_world;
+inline hittable_list two_perlin_spheres() {
+    hittable_list world;
+    std::shared_ptr<marble_texture> per_tex =
+        std::make_shared<marble_texture>(4.0, std::make_shared<turbulance_perlin>(7));
+    world.push_back(std::make_shared<sphere>(point{0, -1000, 0},
+                                             1000,
+                                             std::make_shared<lambertian>(per_tex)));
+    world.push_back(std::make_shared<sphere>(point{0, 2, 0},
+                                             2,
+                                             std::make_shared<lambertian>(per_tex)));
+    return world;
+}
 
-    ret_world.push_back(std::make_shared<bvh_node>(world, 0.0, 0.0));
-
-    return ret_world;
+inline hittable_list earth() {
+    std::shared_ptr<image_texture> earth_texture = std::make_shared<image_texture>("./data/earthmap.jpg");
+    std::shared_ptr<lambertian> earth_surface_material = std::make_shared<lambertian>(earth_texture);
+    hittable_list world;
+    world.push_back(std::make_shared<sphere>(point{0, 0, 0}, 2, earth_surface_material));
+    return world;
 }
 
 #endif  // GENERATOR_H_
