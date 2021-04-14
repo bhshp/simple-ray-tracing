@@ -1,16 +1,14 @@
 src_dir = ./src
 target_dir = ./target
+header_dir = ./third-party
 
 target = $(target_dir)/main.out
-
 temp_image = $(target_dir)/out.ppm
 target_image = $(target_dir)/out.jpg
 current_image = $(target_dir)/current.jpg
-# 
-# date +"%F %T"
 
 CC = clang++
-CCFLAGS = -std=c++17 -Wall -Wextra -Werror -pedantic-errors -I./include -O3
+CCFLAGS = -std=c++17 -Wall -Wextra -Werror -pedantic-errors -I./include -I./third-party -O3
 
 src = $(wildcard $(src_dir)/*.cc)
 

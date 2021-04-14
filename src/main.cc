@@ -24,14 +24,48 @@ inline color ray_color(const ray& r, const hittable& world, int depth) {
 
 int main() {
     canvas cvs{image_width, image_height};
+    double aspect_ratio = cvs.aspect_ratio();
 
-    camera cam{cvs.aspect_ratio(), point{13, 2, 3}, point{0, 0, 0}, vec{0, 1, 0}, 20, 10, 0.1, 0.0, 1.0};
+    point look_from;
+    point look_at;
+    vec view_up = vec{0, 1, 0};
+    double vertical_field_of_view_degrees = 40;
+    double focus_dist = 10;
+    double aperture = 0.1;
+    double start_time = 0.0;
+    double end_time = 0.0;
+
+    hittable_list world;
+
+    switch (0) {
+        case 1:
+            std::cout << "Random World" << std::endl;
+            look_from = point{13, 2, 3};
+            look_at = point{0, 0, 0};
+            vertical_field_of_view_degrees = 20;
+            aperture = 0.1;
+            start_time = 0.0;
+            end_time = 1.0;
+            world = random_world();
+            break;
+        default:
+        case 2:
+            std::cout << "Two Spheres" << std::endl;
+            look_from = point{13, 2, 3};
+            look_at = point{0, 0, 0};
+            vertical_field_of_view_degrees = 20;
+            world = two_spheres();
+            break;
+    }
+
+    camera cam{aspect_ratio, look_from, look_at, view_up, vertical_field_of_view_degrees, focus_dist, aperture, start_time, end_time};
 
     {
         std::ofstream out(path);
         out << "P3\n"
             << image_width << ' ' << image_height << "\n255\n";
-        hittable_list world = random_world();
+        // hittable_list world = random_world();
+        hittable_list world = two_spheres();
         progress_bar bar{std::cerr, image_height};
         for (int i = image_height - 1; i >= 0; i--, bar++) {
             for (int j = 0; j < image_width; j++) {

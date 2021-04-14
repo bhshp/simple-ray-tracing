@@ -12,6 +12,8 @@ hittable_list random_world();
 
 hittable_list small_world();
 
+hittable_list two_spheres();
+
 // Implementation
 
 inline hittable_list random_world() {
@@ -76,6 +78,23 @@ inline hittable_list small_world() {
     world.push_back(std::make_shared<sphere>(point{-1, 0, -1}, -0.4, material_left));
     world.push_back(std::make_shared<sphere>(point{1, 0, -1}, 0.5, material_right));
     return world;
+}
+
+inline hittable_list two_spheres() {
+    std::shared_ptr<checker_board_texture> checker_board = std::make_shared<checker_board_texture>(color{0.2, 0.3, 0.1},
+                                                                                                   color{0.9, 0.9, 0.9});
+    std::shared_ptr<checker_board_texture> material_ground = std::make_shared<checker_board_texture>(color(0.2, 0.3, 0.1),
+                                                                                                     color(0.9, 0.9, 0.9));
+
+    hittable_list world;
+    world.push_back(std::make_shared<sphere>(point{0, 10, 0}, 10, std::make_shared<lambertian>(checker_board)));
+    world.push_back(std::make_shared<sphere>(point{0, -10, 0}, 10, std::make_shared<lambertian>(checker_board)));
+
+    hittable_list ret_world;
+
+    ret_world.push_back(std::make_shared<bvh_node>(world, 0.0, 0.0));
+
+    return ret_world;
 }
 
 #endif  // GENERATOR_H_
