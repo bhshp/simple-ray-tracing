@@ -20,9 +20,9 @@ struct hittable_list : public hittable {
     void pop_back();
     void clear();
 
-    virtual std::optional<hit_record> hit(const ray &r, double t_min, double t_max) const override;
+    virtual hit_result_type hit(const ray &r, double t_min, double t_max) const override;
 
-    virtual std::optional<aabb> bounding_box(double time_0, double time_1) const override;
+    virtual bound_result_type bounding_box(double time_0, double time_1) const override;
 
    private:
     std::vector<std::shared_ptr<hittable>> list_;
@@ -48,11 +48,11 @@ inline void hittable_list::clear() {
     list_.clear();
 }
 
-inline std::optional<hit_record> hittable_list::hit(const ray &r, double t_min, double t_max) const {
-    std::optional<hit_record> result;
+inline hit_result_type hittable_list::hit(const ray &r, double t_min, double t_max) const {
+    hit_result_type result;
     double closest_so_far = t_max;
     for (const std::shared_ptr<hittable> &o : list_) {
-        if (std::optional<hit_record> temp = o->hit(r, t_min, closest_so_far); temp.has_value()) {
+        if (hit_result_type temp = o->hit(r, t_min, closest_so_far); temp.has_value()) {
             closest_so_far = temp->t();
             result = temp;
         }
@@ -60,13 +60,13 @@ inline std::optional<hit_record> hittable_list::hit(const ray &r, double t_min, 
     return result;
 }
 
-inline std::optional<aabb> hittable_list::bounding_box(double time_0, double time_1) const {
+inline bound_result_type hittable_list::bounding_box(double time_0, double time_1) const {
     if (list_.empty()) {
         return std::nullopt;
     }
-    std::optional<aabb> res;
+    bound_result_type res;
     for (const std::shared_ptr<hittable> &o : list_) {
-        if (std::optional<aabb> bound_res = o->bounding_box(time_0, time_1); bound_res.has_value()) {
+        if (bound_result_type bound_res = o->bounding_box(time_0, time_1); bound_res.has_value()) {
             if (res.has_value()) {
                 res = surrounding_box(res.value(), bound_res.value());
             } else {

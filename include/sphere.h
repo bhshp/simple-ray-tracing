@@ -22,9 +22,9 @@ struct sphere : public hittable {
     double radius() const;
     std::shared_ptr<material> mat() const;
 
-    virtual std::optional<hit_record> hit(const ray& r, double t_min, double t_max) const override;
+    virtual hit_result_type hit(const ray& r, double t_min, double t_max) const override;
 
-    virtual std::optional<aabb> bounding_box(double time_0, double time_1) const override;
+    virtual bound_result_type bounding_box(double time_0, double time_1) const override;
 
    private:
     point center_;
@@ -52,7 +52,7 @@ inline double sphere::radius() const { return radius_; }
 
 inline std::shared_ptr<material> sphere::mat() const { return mat_; }
 
-inline std::optional<hit_record> sphere::hit(const ray& r, double t_min, double t_max) const {
+inline hit_result_type sphere::hit(const ray& r, double t_min, double t_max) const {
     vec oc = r.origin() - center();
     double a = r.direction().length2();
     double half_b = oc * r.direction();
@@ -71,7 +71,7 @@ inline std::optional<hit_record> sphere::hit(const ray& r, double t_min, double 
     }
     point p = r.at(root);
     vec normal = (p - center()) / radius();
-    bool front_face = (r.direction() * normal) <= 0;
+    bool front_face = (r.direction() * normal) < 0;
     if (!front_face) {
         normal = -normal;
     }
@@ -79,7 +79,7 @@ inline std::optional<hit_record> sphere::hit(const ray& r, double t_min, double 
     return std::make_optional<hit_record>(root, p, normal, front_face, mat(), uv.first, uv.second);
 }
 
-inline std::optional<aabb> sphere::bounding_box(double, double) const {
+inline bound_result_type sphere::bounding_box(double, double) const {
     double r = radius();
     vec c = center();
     vec rad_vec{r, r, r};

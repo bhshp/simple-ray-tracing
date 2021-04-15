@@ -25,9 +25,9 @@ struct moving_sphere : public hittable {
     point center(double time) const;
     double radius() const;
 
-    virtual std::optional<hit_record> hit(const ray &r, double t_min, double t_max) const override;
+    virtual hit_result_type hit(const ray &r, double t_min, double t_max) const override;
 
-    virtual std::optional<aabb> bounding_box(double time_0, double time_1) const override;
+    virtual bound_result_type bounding_box(double time_0, double time_1) const override;
 
    private:
     point center_1_;
@@ -70,7 +70,7 @@ inline point moving_sphere::center(double time) const {
     return center_1_ + (time - start_) / (end_ - start_) * (center_2_ - center_1_);
 }
 
-inline std::optional<hit_record> moving_sphere::hit(const ray &r, double t_min, double t_max) const {
+inline hit_result_type moving_sphere::hit(const ray &r, double t_min, double t_max) const {
     vec oc = r.origin() - center(r.time());
     double a = r.direction().length2();
     double half_b = oc * r.direction();
@@ -89,14 +89,14 @@ inline std::optional<hit_record> moving_sphere::hit(const ray &r, double t_min, 
     }
     point p = r.at(root);
     vec normal = (p - center(r.time())) / radius();
-    bool front_face = (r.direction() * normal) <= 0;
+    bool front_face = (r.direction() * normal) < 0;
     if (!front_face) {
         normal = -normal;
     }
     return std::make_optional<hit_record>(root, p, normal, front_face, mat_);
 }
 
-std::optional<aabb> moving_sphere::bounding_box(double time_0, double time_1) const {
+bound_result_type moving_sphere::bounding_box(double time_0, double time_1) const {
     point first = center(time_0);
     point second = center(time_1);
     double r = radius();

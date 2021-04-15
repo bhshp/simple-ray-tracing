@@ -30,9 +30,9 @@ struct bvh_node : public hittable {
 
     virtual ~bvh_node();
 
-    virtual std::optional<hit_record> hit(const ray &r, double t_min, double t_max) const;
+    virtual hit_result_type hit(const ray &r, double t_min, double t_max) const;
 
-    virtual std::optional<aabb> bounding_box(double time_0, double time_1) const;
+    virtual bound_result_type bounding_box(double time_0, double time_1) const;
 
    private:
     std::shared_ptr<hittable> left_;
@@ -68,7 +68,7 @@ inline bvh_node::bvh_node(std::vector<std::shared_ptr<hittable>> &list,
     }
     const int choose = random_int(0, 2);
     auto cmp = [choose](const std::shared_ptr<hittable> &a, const std::shared_ptr<hittable> &b) -> bool {
-        if (std::optional<aabb> box_a = a->bounding_box(0, 0), box_b = b->bounding_box(0, 0);
+        if (bound_result_type box_a = a->bounding_box(0, 0), box_b = b->bounding_box(0, 0);
             box_a != std::nullopt && box_b != std::nullopt) {
             return box_a->min()[choose] < box_b->min()[choose];
         }
@@ -89,7 +89,7 @@ inline bvh_node::bvh_node(std::vector<std::shared_ptr<hittable>> &list,
         left_ = std::make_shared<bvh_node>(list, begin, mid, time_0, time_1);
         right_ = std::make_shared<bvh_node>(list, mid, end, time_0, time_1);
     }
-    if (std::optional<aabb> box_l = left_->bounding_box(0, 0), box_r = right_->bounding_box(0, 0);
+    if (bound_result_type box_l = left_->bounding_box(0, 0), box_r = right_->bounding_box(0, 0);
         box_l != std::nullopt && box_r != std::nullopt) {
         box_ = surrounding_box(box_l.value(), box_r.value());
     } else {
@@ -100,19 +100,19 @@ inline bvh_node::bvh_node(std::vector<std::shared_ptr<hittable>> &list,
 
 inline bvh_node::~bvh_node() {}
 
-inline std::optional<hit_record> bvh_node::hit(const ray &r, double t_min, double t_max) const {
+inline hit_result_type bvh_node::hit(const ray &r, double t_min, double t_max) const {
     if (!box_.hit(r, t_min, t_max)) {
         return std::nullopt;
     }
-    std::optional<hit_record> left_hit_record = left_->hit(r, t_min, t_max);
-    std::optional<hit_record> right_hit_record = right_->hit(r, t_min,
+    hit_result_type left_hit_record = left_->hit(r, t_min, t_max);
+    hit_result_type right_hit_record = right_->hit(r, t_min,
                                                              left_hit_record.has_value()
                                                                  ? left_hit_record->t()
                                                                  : t_max);
     return right_hit_record.has_value() ? right_hit_record : left_hit_record;
 }
 
-inline std::optional<aabb> bvh_node::bounding_box(double, double) const {
+inline bound_result_type bvh_node::bounding_box(double, double) const {
     return std::make_optional<aabb>(box_);
 }
 

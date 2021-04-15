@@ -52,8 +52,8 @@ inline hittable_list random_world() {
     }
 
     world.push_back(std::make_shared<sphere>(point{0, 1, 0}, 1.0, std::make_shared<dielectric>(1.5)));
-    world.push_back(std::make_shared<sphere>(point{-4, 1, 0}, 1.0, std::make_shared<lambertian>(color(0.4, 0.2, 0.1))));
-    world.push_back(std::make_shared<sphere>(point{4, 1, 0}, 1.0, std::make_shared<metal>(color(0.7, 0.6, 0.5), 0.0)));
+    world.push_back(std::make_shared<sphere>(point{-4, 1, 0}, 1.0, std::make_shared<lambertian>(color{0.4, 0.2, 0.1})));
+    world.push_back(std::make_shared<sphere>(point{4, 1, 0}, 1.0, std::make_shared<metal>(color{0.7, 0.6, 0.5}, 0.0)));
 
     std::shared_ptr<checker_board_texture> material_ground = std::make_shared<checker_board_texture>(color(0.2, 0.3, 0.1),
                                                                                                      color(0.9, 0.9, 0.9));
@@ -143,6 +143,16 @@ inline hittable_list cornell_box() {
     world.push_back(std::make_shared<xz_rectangle>(0, 555, 0, 555, 0, white));
     world.push_back(std::make_shared<xz_rectangle>(0, 555, 0, 555, 555, white));
     world.push_back(std::make_shared<xy_rectangle>(0, 555, 0, 555, 555, white));
+
+    std::shared_ptr<hittable> box_1 = std::make_shared<box>(point{0, 0, 0}, point{165, 330, 165}, white);
+    box_1 = std::make_shared<translate>(box_1, vec{265, 0, 295});
+    box_1 = std::make_shared<rotate_y>(box_1, 15);
+    world.push_back(box_1);
+
+    std::shared_ptr<hittable> box_2 = std::make_shared<box>(point{0, 0, 0}, point{165, 165, 165}, white);
+    box_2 = std::make_shared<translate>(box_2, vec{130, 0, 65});
+    box_2 = std::make_shared<rotate_y>(box_2, -18);
+    world.push_back(box_2);
 
     return world;
 }
