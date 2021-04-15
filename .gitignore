@@ -32,5 +32,6 @@
 *.app
 
 *.ppm
-/target/*
+*.jpg
+!/data/earthmap.ppm
 !/target/current.jpg

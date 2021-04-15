@@ -76,6 +76,17 @@ struct diffuse_light : public material {
     std::shared_ptr<texture> emit_;
 };
 
+struct isotropic : public material {
+   public:
+    isotropic(const color &c);
+    isotropic(const std::shared_ptr<texture> &t);
+
+    virtual scatter_result_type scatter(const ray &in, const hit_record &rec) const override;
+
+   private:
+    std::shared_ptr<texture> albedo_;
+};
+
 // Implementation
 
 inline color
@@ -149,6 +160,15 @@ inline color diffuse_light::emit(double u, double v, const point &p) const {
 
 inline scatter_result_type diffuse_light::scatter(const ray &, const hit_record &) const {
     return std::nullopt;
+}
+
+inline isotropic::isotropic(const color &c) : albedo_{std::make_shared<solid_color_texture>(c)} {}
+
+inline isotropic::isotropic(const std::shared_ptr<texture> &t) : albedo_{t} {}
+
+inline scatter_result_type isotropic::scatter(const ray &in, const hit_record &rec) const {
+    return std::make_optional<std::pair<color, ray>>(albedo_->value(rec.u(), rec.v(), rec.p()),
+                                                     ray{rec.p(), random_in_unit_sphere(), in.time()});
 }
 
 #endif  // MATERIAL_H_

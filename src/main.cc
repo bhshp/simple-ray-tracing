@@ -23,11 +23,13 @@ inline color ray_color(const ray& r, const color& background, const hittable& wo
 int main() {
     const char* const path = "./target/out.ppm";
 
-    const int image_width = 800;
-    const int image_height = 600;
+    const int image_width = 1920;
+    const int image_height = 1080;
 
-    canvas cvs{image_width, image_height};
-    double aspect_ratio = cvs.aspect_ratio();
+    const double aspect_ratio = 1.0 * image_width / image_height;
+
+    const int samples = 200;
+    const int max_depth = 50;
 
     point look_from = point{13, 2, 3};
     point look_at = point{0, 0, 0};
@@ -38,9 +40,6 @@ int main() {
     double aperture = 0;
     double start_time = 0.0;
     double end_time = 0.0;
-
-    const int samples = 400;
-    const int max_depth = 10;
 
     hittable_list world;
 
@@ -71,11 +70,25 @@ int main() {
             look_from = point(26, 3, 6);
             look_at = point(0, 2, 0);
             break;
-        default:
         case 6:
             world = cornell_box();
             background = color(0, 0, 0);
             look_from = point{278, 278, -800};
+            look_at = point{278, 278, 0};
+            vertical_field_of_view_degrees = 40;
+            break;
+        case 7:
+            world = cornell_smoke();
+            background = color(0, 0, 0);
+            look_from = point{278, 278, -800};
+            look_at = point{278, 278, 0};
+            vertical_field_of_view_degrees = 40;
+            break;
+        default:
+        case 8:
+            world = final_scene();
+            background = color(0, 0, 0);
+            look_from = point{478, 278, -600};
             look_at = point{278, 278, 0};
             vertical_field_of_view_degrees = 40;
             break;
