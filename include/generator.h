@@ -3,8 +3,7 @@
 #ifndef GENERATOR_H_
 #define GENERATOR_H_
 
-#include "bvh_node.h"
-#include "hittable_list.h"
+#include "compact.h"
 
 // Declaration
 
@@ -17,6 +16,8 @@ hittable_list two_spheres();
 hittable_list two_perlin_spheres();
 
 hittable_list earth();
+
+hittable_list simple_light();
 
 // Implementation
 
@@ -114,6 +115,35 @@ inline hittable_list earth() {
     std::shared_ptr<lambertian> earth_surface_material = std::make_shared<lambertian>(earth_texture);
     hittable_list world;
     world.push_back(std::make_shared<sphere>(point{0, 0, 0}, 2, earth_surface_material));
+    return world;
+}
+
+inline hittable_list simple_light() {
+    hittable_list world;
+    std::shared_ptr<marble_texture> per_tex = std::make_shared<marble_texture>(4, std::make_shared<turbulance_perlin>(7));
+    world.push_back(std::make_shared<sphere>(point{0, -1000, 0}, 1000, std::make_shared<lambertian>(per_tex)));
+    world.push_back(std::make_shared<sphere>(point{0, 2, 0}, 2, std::make_shared<lambertian>(per_tex)));
+
+    std::shared_ptr<diffuse_light> light = std::make_shared<diffuse_light>(color{4, 4, 4});
+    world.push_back(std::make_shared<xy_rectangle>(3, 5, 1, 3, -2, light));
+    return world;
+}
+
+inline hittable_list cornell_box() {
+    hittable_list world;
+
+    std::shared_ptr<lambertian> red = std::make_shared<lambertian>(color{0.65, 0.05, 0.05});
+    std::shared_ptr<lambertian> white = std::make_shared<lambertian>(color{0.73, 0.73, 0.73});
+    std::shared_ptr<lambertian> green = std::make_shared<lambertian>(color{0.12, 0.45, 0.15});
+    std::shared_ptr<diffuse_light> light = std::make_shared<diffuse_light>(color{15, 15, 15});
+
+    world.push_back(std::make_shared<yz_rectangle>(0, 555, 0, 555, 555, green));
+    world.push_back(std::make_shared<yz_rectangle>(0, 555, 0, 555, 0, red));
+    world.push_back(std::make_shared<xz_rectangle>(213, 343, 227, 332, 554, light));
+    world.push_back(std::make_shared<xz_rectangle>(0, 555, 0, 555, 0, white));
+    world.push_back(std::make_shared<xz_rectangle>(0, 555, 0, 555, 555, white));
+    world.push_back(std::make_shared<xy_rectangle>(0, 555, 0, 555, 555, white));
+
     return world;
 }
 

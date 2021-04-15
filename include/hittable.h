@@ -9,6 +9,8 @@
 #include "hit_record.h"  // hit_record
 #include "ray.h"         // ray
 
+using hit_result_type = std::optional<hit_record>;
+
 class hittable {
    public:
     virtual std::optional<hit_record> hit(const ray& r, double t_min, double t_max) const = 0;

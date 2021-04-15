@@ -1,39 +1,46 @@
-#include <fstream>   // std::ofstream
-#include <iostream>  // std::endl
-#include <memory>    // std::make_shared
-#include <string>    // std::string
+#include <fstream>
+#include <iostream>
+#include <memory>
 
 #include "compact.h"
 #include "generator.h"
 #include "progress_bar.h"
 
-inline color ray_color(const ray& r, const hittable& world, int depth) {
+inline color ray_color(const ray& r, const color& background, const hittable& world, int depth) {
     if (depth <= 0) {
         return color{};
     }
     if (hit_result_type rec = world.hit(r, eps, inf); rec.has_value()) {
+        color emitted = rec->mat()->emit(rec->u(), rec->v(), rec->p());
         if (scatter_result_type scatter = rec->mat()->scatter(r, rec.value()); scatter.has_value()) {
-            return scatter->first % ray_color(scatter->second, world, depth - 1);
+            return emitted + scatter->first % ray_color(scatter->second, background, world, depth - 1);
         }
-        return color{};
+        return emitted;
     }
-    static const color white = color{1.0, 1.0, 1.0};
-    static const color blue{0.5, 0.7, 1.0};
-    return mix(white, blue, 0.5 * (r.direction().unit().y() + 1.0));
+    return background;
 }
 
 int main() {
+    const char* const path = "./target/out.ppm";
+
+    const int image_width = 800;
+    const int image_height = 600;
+
     canvas cvs{image_width, image_height};
     double aspect_ratio = cvs.aspect_ratio();
 
     point look_from = point{13, 2, 3};
     point look_at = point{0, 0, 0};
     vec view_up = vec{0, 1, 0};
+    color background = color{0.7, 0.8, 1};
     double vertical_field_of_view_degrees = 20;
     double focus_dist = 10;
-    double aperture = 0.1;
+    double aperture = 0;
     double start_time = 0.0;
     double end_time = 0.0;
+
+    const int samples = 400;
+    const int max_depth = 10;
 
     hittable_list world;
 
@@ -53,10 +60,24 @@ int main() {
             std::cout << "Two Perlin Spheres" << std::endl;
             world = two_perlin_spheres();
             break;
-        default:
         case 4:
             std::cout << "Earth" << std::endl;
             world = earth();
+            break;
+        case 5:
+            std::cout << "Simple Light" << std::endl;
+            world = simple_light();
+            background = color{0, 0, 0};
+            look_from = point(26, 3, 6);
+            look_at = point(0, 2, 0);
+            break;
+        default:
+        case 6:
+            world = cornell_box();
+            background = color(0, 0, 0);
+            look_from = point{278, 278, -800};
+            look_at = point{278, 278, 0};
+            vertical_field_of_view_degrees = 40;
             break;
     }
 
@@ -74,7 +95,7 @@ int main() {
                     double u = (i + random_double()) / (image_height - 1);
                     double v = (j + random_double()) / (image_width - 1);
                     ray r = cam.get_ray(u, v);
-                    pixel += ray_color(r, world, max_depth);
+                    pixel += ray_color(r, background, world, max_depth);
                 }
                 out << sample_cast(pixel, samples) << '\n';
             }

@@ -18,6 +18,7 @@ using scatter_result_type = std::optional<std::pair<color, ray>>;
 
 struct material {
    public:
+    virtual color emit(double u, double v, const point &p) const;
     virtual scatter_result_type scatter(const ray &in, const hit_record &rec) const = 0;
 };
 
@@ -29,7 +30,7 @@ struct lambertian : public material {
 
     std::shared_ptr<texture> albedo() const;
 
-    virtual scatter_result_type scatter(const ray &, const hit_record &rec) const override;
+    virtual scatter_result_type scatter(const ray &in, const hit_record &rec) const override;
 
    private:
     std::shared_ptr<texture> albedo_;
@@ -42,7 +43,7 @@ struct metal : public material {
 
     color albedo() const;
 
-    virtual scatter_result_type scatter(const ray &, const hit_record &rec) const override;
+    virtual scatter_result_type scatter(const ray &in, const hit_record &rec) const override;
 
    private:
     color albedo_;
@@ -54,7 +55,7 @@ struct dielectric : public material {
     dielectric(double refraction);
     virtual ~dielectric();
 
-    virtual scatter_result_type scatter(const ray &, const hit_record &rec) const override;
+    virtual scatter_result_type scatter(const ray &in, const hit_record &rec) const override;
 
    private:
     static double reflectance(double cos, double ratio);
@@ -62,7 +63,26 @@ struct dielectric : public material {
     double refraction_;
 };
 
+struct diffuse_light : public material {
+   public:
+    diffuse_light(color c);
+    diffuse_light(const std::shared_ptr<texture> &p);
+    virtual ~diffuse_light();
+
+    virtual color emit(double u, double v, const point &p) const override;
+    virtual scatter_result_type scatter(const ray &in, const hit_record &rec) const override;
+
+   private:
+    std::shared_ptr<texture> emit_;
+};
+
 // Implementation
+
+inline color
+material::emit(double, double, const point &) const {
+    static color black = color{0, 0, 0};
+    return black;
+}
 
 inline lambertian::lambertian(const color &c) : albedo_{std::make_shared<solid_color_texture>(c)} {}
 
@@ -115,6 +135,20 @@ inline double dielectric::reflectance(double cos, double ratio) {
     // Schlick approximate
     double r0 = sqr((1 - ratio) / (1 + ratio));
     return r0 + (1 - r0) * pow(1 - cos, 5);
+}
+
+inline diffuse_light::diffuse_light(color c) : emit_{std::make_shared<solid_color_texture>(c)} {}
+
+inline diffuse_light::diffuse_light(const std::shared_ptr<texture> &p) : emit_{p} {}
+
+inline diffuse_light::~diffuse_light() {}
+
+inline color diffuse_light::emit(double u, double v, const point &p) const {
+    return emit_->value(u, v, p);
+}
+
+inline scatter_result_type diffuse_light::scatter(const ray &, const hit_record &) const {
+    return std::nullopt;
 }
 
 #endif  // MATERIAL_H_
