@@ -7,7 +7,6 @@
 
 #include "color.h"
 #include "perlin.h"
-#include "stb_image_wrapper.h"
 
 struct texture {
    public:
@@ -74,13 +73,9 @@ struct image_texture : public texture {
     virtual color value(double u, double v, const point &p) const override;
 
    private:
-    constexpr static int bytes_per_pixel = 3;
-    constexpr static double ratio = 1.0 / 255.0;
-
-    unsigned char *data_;
-    int width_;
-    int height_;
-    int col_bytes_;
+    std::vector<std::vector<color>> data_;
+    size_t width_;
+    size_t height_;
 };
 
 // Implementation
@@ -130,33 +125,53 @@ inline color marble_texture::value(double, double, const point &p) const {
     return 0.5 * (1 + std::sin(scale_ * p.z() + 10 * noise_->noise(p))) * color{1, 1, 1};
 }
 
-inline image_texture::image_texture() : data_{nullptr}, width_{0}, height_{0}, col_bytes_{0} {}
+inline image_texture::image_texture() : data_{}, width_{0}, height_{0} {}
 
 inline image_texture::image_texture(const char *const path) {
-    int components_per_pixel = bytes_per_pixel;
-    if (data_ = stbi_load(path, &width_, &height_, &components_per_pixel, components_per_pixel); data_ == nullptr) {
-        std::cerr << "File Not Exist!" << std::endl;
-        width_ = height_ = 0;
+    const double ratio = 1.0 / 255.0;
+    std::ifstream in{path};
+    if (!in.is_open()) {
+        std::cerr << "File " << path << " Not Exist" << std::endl;
+        return;
     }
-    col_bytes_ = bytes_per_pixel * width_;
+    in.tie(nullptr);
+    std::string type;
+    if (!(in >> type) || type != "P3") {
+        return;
+    }
+    if (!(in >> width_) || !(in >> height_)) {
+        return;
+    }
+    if (!(in >> type) || type != "255") {
+        return;
+    }
+    data_.resize(height_);
+    for (size_t i = height_ - 1; ; i--) {
+        data_[i].resize(width_);
+        for (size_t j = 0; j < width_; j++) {
+            int r, g, b;
+            if (!(in >> r) || !(in >> g) || !(in >> b)) {
+                data_.clear();
+                decltype(data_){}.swap(data_);
+                return;
+            }
+            data_[i][j] = color{b * ratio, r * ratio, g * ratio};
+        }
+        if (i == 0) {
+            break;
+        }
+    }
 }
 
-inline image_texture::~image_texture() {
-    if (data_ != nullptr) {
-        delete data_;
-    }
-}
+inline image_texture::~image_texture() {}
 
 inline color image_texture::value(double u, double v, const point &) const {
-    if (data_ == nullptr) {
-        return color{0, 1, 1};
+    if (data_.empty()) {
+        return color{1, 1, 1};
     }
-    u = clamp(u, 0.0, 1.0);
-    v = 1 - clamp(v, 0.0, 1.0);
-    int i = clamp(static_cast<int>(u * width_), 0, width_ - 1);
-    int j = clamp(static_cast<int>(v * height_), 0, height_ - 1);
-    unsigned char *pixel = &data_[j * col_bytes_ + i * bytes_per_pixel];
-    return color{pixel[0] * ratio, pixel[1] * ratio, pixel[2] * ratio};
+    int i = clamp(static_cast<int>(clamp(v, 0.0, 1.0) * height_), 0, height_ - 1);
+    int j = clamp(static_cast<int>(clamp(u, 0.0, 1.0) * width_), 0, width_ - 1);
+    return data_[i][j];
 }
 
 #endif  // TEXTURE_H_

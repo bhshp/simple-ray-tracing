@@ -110,7 +110,7 @@ inline hittable_list two_perlin_spheres() {
 }
 
 inline hittable_list earth() {
-    std::shared_ptr<image_texture> earth_texture = std::make_shared<image_texture>("./data/earthmap.jpg");
+    std::shared_ptr<image_texture> earth_texture = std::make_shared<image_texture>("./data/earthmap.ppm");
     std::shared_ptr<lambertian> earth_surface_material = std::make_shared<lambertian>(earth_texture);
     hittable_list world;
     world.push_back(std::make_shared<sphere>(point{0, 0, 0}, 2, earth_surface_material));

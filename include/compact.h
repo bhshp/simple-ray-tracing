@@ -16,7 +16,6 @@
 #include "perlin.h"
 #include "ray.h"
 #include "sphere.h"
-#include "stb_image_wrapper.h"
 #include "texture.h"
 #include "util.h"
 #include "vec.h"
@@ -30,7 +29,7 @@ extern const char *const path = "./target/out.ppm";
 extern const int image_width = 1920;
 extern const int image_height = 1080;
 
-extern const int samples = 50;
-extern const int max_depth = 10;
+extern const int samples = 10;
+extern const int max_depth = 5;
 
 #endif  // COMMON_H_

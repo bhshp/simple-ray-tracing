@@ -33,7 +33,7 @@ int main() {
     double focus_dist = 10;
     double aperture = 0.1;
     double start_time = 0.0;
-    double end_time = 0.0;            
+    double end_time = 0.0;
 
     hittable_list world;
 
