@@ -28,7 +28,7 @@ int main() {
 
     const double aspect_ratio = 1.0 * image_width / image_height;
 
-    const int samples = 200;
+    const int samples = 10000;
     const int max_depth = 50;
 
     point look_from = point{13, 2, 3};
@@ -39,7 +39,7 @@ int main() {
     double focus_dist = 10;
     double aperture = 0;
     double start_time = 0.0;
-    double end_time = 0.0;
+    double end_time = 1.0;
 
     hittable_list world;
 

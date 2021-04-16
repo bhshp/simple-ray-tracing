@@ -31,7 +31,5 @@
 *.out
 *.app
 
-*.ppm
-*.jpg
-!/data/earthmap.ppm
-!/target/current.jpg
+target/*
+!target/current.jpg
