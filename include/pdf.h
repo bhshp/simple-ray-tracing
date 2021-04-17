@@ -71,7 +71,7 @@ inline vec hittable_pdf::generate() const {
 }
 
 inline double hittable_pdf::value(const vec &direction) const {
-    return p_->pdf(origin_, direction);
+    return p_->pdf_value(origin_, direction);
 }
 
 inline mixture_pdf::mixture_pdf(const std::shared_ptr<pdf> &a, const std::shared_ptr<pdf> &b) : a_{a}, b_{b} {}

@@ -16,12 +16,14 @@ inline color ray_color(const ray& r, const color& background, const hittable& wo
         color emitted = rec->mat()->emit(r, rec.value(), rec->u(), rec->v(), rec->p());
         if (scatter_result_type scatter = rec->mat()->scatter(r, rec.value());
             scatter.has_value()) {
+            if (scatter->pdf_ptr() == nullptr) {
+                return scatter->albedo() % ray_color(scatter->r(), background, world, lights, depth - 1);
+            }
             std::shared_ptr<hittable_pdf> p0 = std::make_shared<hittable_pdf>(lights, rec->p());
-            std::shared_ptr<cosine_pdf> p1 = std::make_shared<cosine_pdf>(rec->normal());
-            mixture_pdf p{p0, p1};
+            mixture_pdf p{p0, scatter->pdf_ptr()};
             ray scattered{rec->p(), p.generate(), r.time()};
             double pdf_value = p.value(scattered.direction());
-            return emitted + rec->mat()->pdf(r, rec.value(), scattered) *
+            return emitted + rec->mat()->pdf_value(r, rec.value(), scattered) *
                                  scatter->albedo() % ray_color(scattered, background, world, lights, depth - 1) /
                                  pdf_value;
         }
@@ -38,8 +40,12 @@ int main() {
 
     const double aspect_ratio = 1.0 * image_width / image_height;
 
-    const int samples = 200;
-    const int max_depth = 50;
+    std::shared_ptr<hittable_list> lights = std::make_shared<hittable_list>();
+    lights->push_back(std::make_shared<xz_rectangle>(213, 343, 227, 332, 554, nullptr));
+    lights->push_back(std::make_shared<sphere>(point{190, 90, 190}, 90, nullptr));
+
+    const int samples = 1000;
+    const int max_depth = 500;
 
     point look_from = point{13, 2, 3};
     point look_at = point{0, 0, 0};
@@ -105,9 +111,6 @@ int main() {
     }
 
     camera cam{aspect_ratio, look_from, look_at, view_up, vertical_field_of_view_degrees, focus_dist, aperture, start_time, end_time};
-
-    std::shared_ptr<hittable> lights =
-        std::make_shared<xz_rectangle>(213, 343, 227, 332, 554, nullptr);
 
     {
         std::ofstream out(path);

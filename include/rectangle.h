@@ -33,7 +33,7 @@ struct xz_rectangle : public rectangle {
 
     virtual bound_result_type bounding_box(double time_0, double time_1) const override;
     virtual hit_result_type hit(const ray &r, double t_min, double t_max) const override;
-    virtual double pdf(const point &origin, const vec &direction) const override;
+    virtual double pdf_value(const point &origin, const vec &direction) const override;
     virtual vec random(const point &origin) const override;
 
    private:
@@ -134,7 +134,7 @@ hit_result_type xz_rectangle::hit(const ray &r, double t_min, double t_max) cons
     return std::make_optional<hit_record>(t, p, normal, front_face, mat_, u, v);
 }
 
-inline double xz_rectangle::pdf(const point &origin, const vec &direction) const {
+inline double xz_rectangle::pdf_value(const point &origin, const vec &direction) const {
     if (hit_result_type rec = hit(ray{origin, direction}, eps, inf); rec.has_value()) {
         double area = (x1_ - x0_) * (z1_ - z0_);
         double length2 = sqr(rec->t()) * direction.length2();

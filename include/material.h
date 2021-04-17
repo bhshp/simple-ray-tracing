@@ -9,6 +9,7 @@
 #include "color.h"
 #include "hit_record.h"
 #include "ortho.h"
+#include "pdf.h"
 #include "ray.h"
 #include "texture.h"
 #include "vec.h"
@@ -18,16 +19,16 @@ struct hit_record;
 struct scatter_record {
    public:
     scatter_record();
-    scatter_record(const color &c, const ray &r, double pdf);
+    scatter_record(const color &c, const ray &r, const std::shared_ptr<pdf> &p);
     ~scatter_record();
     color albedo() const;
     ray r() const;
-    double pdf() const;
+    std::shared_ptr<pdf> pdf_ptr() const;
 
    private:
     color albedo_;
     ray r_;
-    double pdf_;
+    std::shared_ptr<pdf> pdf_;
 };
 
 using scatter_result_type = std::optional<scatter_record>;
@@ -38,7 +39,7 @@ struct material {
 
     virtual ~material();
     virtual color emit(const ray &in, const hit_record &rec, double u, double v, const point &p) const;
-    virtual double pdf(const ray &in, const hit_record &rec, const ray &scattered) const;
+    virtual double pdf_value(const ray &in, const hit_record &rec, const ray &scattered) const;
     virtual scatter_result_type scatter(const ray &in, const hit_record &rec) const;
 };
 
@@ -49,7 +50,7 @@ struct lambertian : public material {
 
     virtual ~lambertian();
     virtual scatter_result_type scatter(const ray &in, const hit_record &rec) const override;
-    virtual double pdf(const ray &in, const hit_record &rec, const ray &scattered) const override;
+    virtual double pdf_value(const ray &in, const hit_record &rec, const ray &scattered) const override;
 
     std::shared_ptr<texture> albedo() const;
 
@@ -112,7 +113,7 @@ struct isotropic : public material {
 
 inline scatter_record::scatter_record() {}
 
-inline scatter_record::scatter_record(const color &c, const ray &r, double pdf) : albedo_{c}, r_{r}, pdf_{pdf} {}
+inline scatter_record::scatter_record(const color &c, const ray &r, const std::shared_ptr<pdf> &p) : albedo_{c}, r_{r}, pdf_{p} {}
 
 inline scatter_record::~scatter_record() {}
 
@@ -120,7 +121,7 @@ inline color scatter_record::albedo() const { return albedo_; }
 
 inline ray scatter_record::r() const { return r_; }
 
-inline double scatter_record::pdf() const { return pdf_; }
+inline std::shared_ptr<pdf> scatter_record::pdf_ptr() const { return pdf_; }
 
 inline material::material() {}
 
@@ -130,7 +131,7 @@ inline color material::emit(const ray &, const hit_record &, double, double, con
     return color{0, 0, 0};
 }
 
-inline double material::pdf(const ray &, const hit_record &, const ray &) const {
+inline double material::pdf_value(const ray &, const hit_record &, const ray &) const {
     return 1;
 }
 
@@ -154,10 +155,10 @@ inline scatter_result_type lambertian::scatter(const ray &in, const hit_record &
         std::in_place,
         albedo_->value(rec.u(), rec.v(), rec.p()),
         scattered,
-        uvw.w() * scattered.direction() / pi};
+        std::make_shared<cosine_pdf>(rec.normal())};
 }
 
-inline double lambertian::pdf(const ray &, const hit_record &rec, const ray &scattered) const {
+inline double lambertian::pdf_value(const ray &, const hit_record &rec, const ray &scattered) const {
     double cosine = rec.normal() * scattered.direction().unit();
     return cosine < 0 ? 0 : cosine / pi;
 }
@@ -177,7 +178,7 @@ inline scatter_result_type metal::scatter(const ray &in, const hit_record &rec) 
     return scatter_result_type{std::in_place,
                                albedo(),
                                scattered,
-                               1};
+                               nullptr};
     ;
 }
 
@@ -196,7 +197,7 @@ inline scatter_result_type dielectric::scatter(const ray &in, const hit_record &
     return scatter_result_type{std::in_place,
                                color{1, 1, 1},
                                ray{rec.p(), direction, in.time()},
-                               1};
+                               nullptr};
 }
 
 inline double dielectric::reflectance(double cos, double ratio) {
@@ -228,7 +229,7 @@ inline scatter_result_type isotropic::scatter(const ray &in, const hit_record &r
         std::in_place,
         albedo_->value(rec.u(), rec.v(), rec.p()),
         ray{rec.p(), random_in_unit_sphere(), in.time()},
-        1};
+        nullptr};
 }
 
 #endif  // MATERIAL_H_

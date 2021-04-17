@@ -4,7 +4,7 @@ Follow the implementation of [*Ray Tracing In One Weekend*](https://raytracing.g
 
 ## Current Status
 
-Just finish [*Ray Tracing In One Weekend*](https://raytracing.github.io/books/RayTracingInOneWeekend.html) and [*Ray Tracing The Next Week*](https://raytracing.github.io/books/RayTracingTheNextWeek.html).
+Finish all 3 books, now open for debugging and adding new features.
 
 
 ## Requirements

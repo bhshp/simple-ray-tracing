@@ -150,15 +150,19 @@ inline hittable_list cornell_box() {
     world.push_back(std::make_shared<xz_rectangle>(0, 555, 0, 555, 0, white));
     world.push_back(std::make_shared<xy_rectangle>(0, 555, 0, 555, 555, white));
 
+    // std::shared_ptr<material> aluminium = std::make_shared<metal>(color(0.8, 0.85, 0.88), 0.0);
+
     std::shared_ptr<hittable> box1 = std::make_shared<box>(point(0, 0, 0), point(165, 330, 165), white);
     box1 = std::make_shared<rotate_y>(box1, 15);
     box1 = std::make_shared<translate>(box1, vec(265, 0, 295));
     world.push_back(box1);
 
-    std::shared_ptr<hittable> box2 = std::make_shared<box>(point(0, 0, 0), point(165, 165, 165), white);
-    box2 = std::make_shared<rotate_y>(box2, -18);
-    box2 = std::make_shared<translate>(box2, vec(130, 0, 65));
-    world.push_back(box2);
+    // std::shared_ptr<hittable> box2 = std::make_shared<box>(point(0, 0, 0), point(165, 165, 165), white);
+    // box2 = std::make_shared<rotate_y>(box2, -18);
+    // box2 = std::make_shared<translate>(box2, vec(130, 0, 65));
+    // world.push_back(box2);
+
+    world.push_back(std::make_shared<sphere>(point{190, 90, 190}, 90, std::make_shared<dielectric>(1.5)));
 
     return world;
 }

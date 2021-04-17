@@ -61,7 +61,9 @@ inline double random_double(double a, double b) {
 }
 
 inline int color_cast(double c) {
-    if (c > 0 && c < 1) {
+    if (std::isnan(c)) {
+        return 0;
+    } else if (c > 0 && c < 1) {
         return static_cast<int>(c * 256.0);
     }
     return c <= 0 ? 0 : 255;

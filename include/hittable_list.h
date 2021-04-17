@@ -20,9 +20,10 @@ struct hittable_list : public hittable {
     void pop_back();
     void clear();
 
-    virtual hit_result_type hit(const ray &r, double t_min, double t_max) const override;
-
     virtual bound_result_type bounding_box(double time_0, double time_1) const override;
+    virtual hit_result_type hit(const ray &r, double t_min, double t_max) const override;
+    virtual double pdf_value(const point &origin, const vec &direction) const override;
+    virtual vec random(const point &origin) const override;
 
    private:
     std::vector<std::shared_ptr<hittable>> list_;
@@ -77,6 +78,19 @@ inline bound_result_type hittable_list::bounding_box(double time_0, double time_
         }
     }
     return res;
+}
+
+inline double hittable_list::pdf_value(const point &origin, const vec &direction) const {
+    double weight = 1.0 / list_.size();
+    double sum = 0;
+    for (const std::shared_ptr<hittable> &o : list_) {
+        sum += weight * o->pdf_value(origin, direction);
+    }
+    return sum;
+}
+
+inline vec hittable_list::random(const point &origin) const {
+    return list_[random_int(0, list_.size() - 1)]->random(origin);
 }
 
 #endif  // HITTABLE_LIST_H_

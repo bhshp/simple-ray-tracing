@@ -60,6 +60,8 @@ vec random_unit_vector();
 
 vec random_cosine_direction();
 
+vec random_to_sphere(double radius, double length2);
+
 vec reflect(const vec &v, const vec &n);
 
 vec refract(const vec &uv, const vec &n, double ratio);
@@ -223,6 +225,15 @@ inline vec random_cosine_direction() {
     double x = std::cos(phi) * std::sqrt(r);
     double y = std::sin(phi) * std::sqrt(r);
     double z = std::sqrt(1 - r);
+    return vec{x, y, z};
+}
+
+vec random_to_sphere(double radius, double length2) {
+    const double phi = 2 * pi * random_double();
+    double r = random_double();
+    double z = 1 + r * (std::sqrt(1 - sqr(radius) / length2) - 1);
+    double x = std::cos(phi) * std::sqrt(1 - sqr(z));
+    double y = std::sin(phi) * std::sqrt(1 - sqr(z));
     return vec{x, y, z};
 }
 

@@ -17,7 +17,7 @@ struct hittable {
     virtual ~hittable();
     virtual bound_result_type bounding_box(double time_0, double time_1) const = 0;
     virtual hit_result_type hit(const ray &r, double t_min, double t_max) const = 0;
-    virtual double pdf(const point &origin, const vec &direction) const;
+    virtual double pdf_value(const point &origin, const vec &direction) const;
     virtual vec random(const point &origin) const;
 };
 
@@ -35,7 +35,7 @@ struct flip_face : public hittable {
 
 inline hittable::~hittable() {}
 
-inline double hittable::pdf(const point &, const vec &) const {
+inline double hittable::pdf_value(const point &, const vec &) const {
     return 0;
 }
 

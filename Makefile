@@ -30,9 +30,8 @@ clean:
 	$(RM) $(target_dir)/*.o $(target_image) $(target) $(temp_image)
 
 new:
-	$(RM) $(target_dir)/current.jpg
 	make $(target_image)
-	mv $(target_dir)/out.jpg $(target_dir)/current.jpg
+	cp -f $(target_dir)/out.jpg $(target_dir)/current.jpg
 	code $(current_image)
 
 .PHONY: all clean new build
