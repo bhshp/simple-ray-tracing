@@ -14,6 +14,8 @@
 #include "hittable_list.h"
 #include "material.h"
 #include "moving_sphere.h"
+#include "ortho.h"
+#include "pdf.h"
 #include "perlin.h"
 #include "ray.h"
 #include "rectangle.h"

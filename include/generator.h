@@ -141,24 +141,24 @@ inline hittable_list cornell_box() {
     std::shared_ptr<lambertian> red = std::make_shared<lambertian>(color{0.65, 0.05, 0.05});
     std::shared_ptr<lambertian> white = std::make_shared<lambertian>(color{0.73, 0.73, 0.73});
     std::shared_ptr<lambertian> green = std::make_shared<lambertian>(color{0.12, 0.45, 0.15});
-    std::shared_ptr<diffuse_light> light = std::make_shared<diffuse_light>(color{7, 7, 7});
+    std::shared_ptr<diffuse_light> light = std::make_shared<diffuse_light>(color{15, 15, 15});
 
     world.push_back(std::make_shared<yz_rectangle>(0, 555, 0, 555, 555, green));
     world.push_back(std::make_shared<yz_rectangle>(0, 555, 0, 555, 0, red));
-    world.push_back(std::make_shared<xz_rectangle>(113, 443, 127, 432, 554, light));
+    world.push_back(std::make_shared<flip_face>(std::make_shared<xz_rectangle>(213, 343, 227, 332, 554, light)));
     world.push_back(std::make_shared<xz_rectangle>(0, 555, 0, 555, 555, white));
     world.push_back(std::make_shared<xz_rectangle>(0, 555, 0, 555, 0, white));
     world.push_back(std::make_shared<xy_rectangle>(0, 555, 0, 555, 555, white));
 
-    std::shared_ptr<hittable> box_1 = std::make_shared<box>(point{0, 0, 0}, point{165, 330, 165}, white);
-    box_1 = std::make_shared<translate>(box_1, vec{265, 0, 295});
-    box_1 = std::make_shared<rotate_y>(box_1, 15);
-    world.push_back(box_1);
+    std::shared_ptr<hittable> box1 = std::make_shared<box>(point(0, 0, 0), point(165, 330, 165), white);
+    box1 = std::make_shared<rotate_y>(box1, 15);
+    box1 = std::make_shared<translate>(box1, vec(265, 0, 295));
+    world.push_back(box1);
 
-    std::shared_ptr<hittable> box_2 = std::make_shared<box>(point{0, 0, 0}, point{165, 165, 165}, white);
-    box_2 = std::make_shared<translate>(box_2, vec{130, 0, 65});
-    box_2 = std::make_shared<rotate_y>(box_2, -18);
-    world.push_back(box_2);
+    std::shared_ptr<hittable> box2 = std::make_shared<box>(point(0, 0, 0), point(165, 165, 165), white);
+    box2 = std::make_shared<rotate_y>(box2, -18);
+    box2 = std::make_shared<translate>(box2, vec(130, 0, 65));
+    world.push_back(box2);
 
     return world;
 }

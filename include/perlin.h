@@ -52,7 +52,7 @@ inline perlin::perlin() : random_vec_{},
                           perm_y_{generate_and_shuffle()},
                           perm_z_{generate_and_shuffle()} {
     for (vec &x : random_vec_) {
-        x = vec::random(-1, 1).unit();
+        x = random_unit_vector();
     }
 }
 

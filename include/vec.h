@@ -56,6 +56,10 @@ vec random_in_hemisphere(const vec &v);
 
 vec random_in_unit_disk();
 
+vec random_unit_vector();
+
+vec random_cosine_direction();
+
 vec reflect(const vec &v, const vec &n);
 
 vec refract(const vec &uv, const vec &n, double ratio);
@@ -178,14 +182,6 @@ inline vec &vec::unitize() {
     return *this;
 }
 
-inline vec vec::random() {
-    return vec::random(0.0, 1.0);
-}
-
-inline vec vec::random(double min, double max) {
-    return vec{random_double(min, max), random_double(min, max), random_double(min, max)};
-}
-
 inline vec operator*(double val, const vec &t) {
     return t * val;
 }
@@ -196,7 +192,7 @@ inline std::ostream &operator<<(std::ostream &os, const vec &v) {
 
 inline vec random_in_unit_sphere() {
     do {
-        vec p = vec::random(-1, 1);
+        vec p = vec{random_double(-1, 1), random_double(-1, 1), random_double(-1, 1)};
         if (p.length2() < 1) {
             return p;
         }
@@ -215,6 +211,19 @@ inline vec random_in_unit_disk() {
             return p;
         }
     } while (true);
+}
+
+inline vec random_unit_vector() {
+    return random_in_unit_sphere().unit();
+}
+
+inline vec random_cosine_direction() {
+    const double phi = 2 * pi * random_double();
+    double r = random_double();
+    double x = std::cos(phi) * std::sqrt(r);
+    double y = std::sin(phi) * std::sqrt(r);
+    double z = std::sqrt(1 - r);
+    return vec{x, y, z};
 }
 
 inline vec reflect(const vec &v, const vec &n) {

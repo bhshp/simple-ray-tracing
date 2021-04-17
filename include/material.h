@@ -8,29 +8,50 @@
 
 #include "color.h"
 #include "hit_record.h"
+#include "ortho.h"
 #include "ray.h"
 #include "texture.h"
 #include "vec.h"
 
 struct hit_record;
 
-using scatter_result_type = std::optional<std::pair<color, ray>>;
+struct scatter_record {
+   public:
+    scatter_record();
+    scatter_record(const color &c, const ray &r, double pdf);
+    ~scatter_record();
+    color albedo() const;
+    ray r() const;
+    double pdf() const;
+
+   private:
+    color albedo_;
+    ray r_;
+    double pdf_;
+};
+
+using scatter_result_type = std::optional<scatter_record>;
 
 struct material {
    public:
-    virtual color emit(double u, double v, const point &p) const;
-    virtual scatter_result_type scatter(const ray &in, const hit_record &rec) const = 0;
+    material();
+
+    virtual ~material();
+    virtual color emit(const ray &in, const hit_record &rec, double u, double v, const point &p) const;
+    virtual double pdf(const ray &in, const hit_record &rec, const ray &scattered) const;
+    virtual scatter_result_type scatter(const ray &in, const hit_record &rec) const;
 };
 
 struct lambertian : public material {
    public:
     lambertian(const color &c);
     lambertian(const std::shared_ptr<texture> &a);
+
     virtual ~lambertian();
+    virtual scatter_result_type scatter(const ray &in, const hit_record &rec) const override;
+    virtual double pdf(const ray &in, const hit_record &rec, const ray &scattered) const override;
 
     std::shared_ptr<texture> albedo() const;
-
-    virtual scatter_result_type scatter(const ray &in, const hit_record &rec) const override;
 
    private:
     std::shared_ptr<texture> albedo_;
@@ -39,11 +60,11 @@ struct lambertian : public material {
 struct metal : public material {
    public:
     metal(const color &a, double f = 1.0);
+
     virtual ~metal();
+    virtual scatter_result_type scatter(const ray &in, const hit_record &rec) const override;
 
     color albedo() const;
-
-    virtual scatter_result_type scatter(const ray &in, const hit_record &rec) const override;
 
    private:
     color albedo_;
@@ -69,7 +90,7 @@ struct diffuse_light : public material {
     diffuse_light(const std::shared_ptr<texture> &p);
     virtual ~diffuse_light();
 
-    virtual color emit(double u, double v, const point &p) const override;
+    virtual color emit(const ray &in, const hit_record &rec, double u, double v, const point &p) const override;
     virtual scatter_result_type scatter(const ray &in, const hit_record &rec) const override;
 
    private:
@@ -89,10 +110,32 @@ struct isotropic : public material {
 
 // Implementation
 
-inline color
-material::emit(double, double, const point &) const {
-    static color black = color{0, 0, 0};
-    return black;
+inline scatter_record::scatter_record() {}
+
+inline scatter_record::scatter_record(const color &c, const ray &r, double pdf) : albedo_{c}, r_{r}, pdf_{pdf} {}
+
+inline scatter_record::~scatter_record() {}
+
+inline color scatter_record::albedo() const { return albedo_; }
+
+inline ray scatter_record::r() const { return r_; }
+
+inline double scatter_record::pdf() const { return pdf_; }
+
+inline material::material() {}
+
+inline material::~material() {}
+
+inline color material::emit(const ray &, const hit_record &, double, double, const point &) const {
+    return color{0, 0, 0};
+}
+
+inline double material::pdf(const ray &, const hit_record &, const ray &) const {
+    return 1;
+}
+
+inline scatter_result_type material::scatter(const ray &, const hit_record &) const {
+    return std::nullopt;
 }
 
 inline lambertian::lambertian(const color &c) : albedo_{std::make_shared<solid_color_texture>(c)} {}
@@ -104,12 +147,19 @@ inline lambertian::~lambertian() {}
 inline std::shared_ptr<texture> lambertian::albedo() const { return albedo_; }
 
 inline scatter_result_type lambertian::scatter(const ray &in, const hit_record &rec) const {
-    vec scatter_direction = rec.normal() + random_in_unit_sphere().unit();
-    if (scatter_direction.near_zero()) {
-        scatter_direction = rec.normal();
-    }
-    return std::make_optional<std::pair<color, ray>>(std::make_pair(albedo_->value(rec.u(), rec.v(), rec.p()),
-                                                                    ray{rec.p(), scatter_direction, in.time()}));
+    ortho uvw{rec.normal()};
+    vec direction = uvw.local(random_cosine_direction());
+    ray scattered{rec.p(), direction.unit(), in.time()};
+    return scatter_result_type{
+        std::in_place,
+        albedo_->value(rec.u(), rec.v(), rec.p()),
+        scattered,
+        uvw.w() * scattered.direction() / pi};
+}
+
+inline double lambertian::pdf(const ray &, const hit_record &rec, const ray &scattered) const {
+    double cosine = rec.normal() * scattered.direction().unit();
+    return cosine < 0 ? 0 : cosine / pi;
 }
 
 inline metal::metal(const color &a, double f) : albedo_{a}, fuzz_{f} {}
@@ -124,7 +174,11 @@ inline scatter_result_type metal::scatter(const ray &in, const hit_record &rec) 
     if (scattered.direction() * rec.normal() <= 0) {
         return std::nullopt;
     }
-    return std::make_optional<std::pair<color, ray>>(std::make_pair(albedo(), scattered));
+    return scatter_result_type{std::in_place,
+                               albedo(),
+                               scattered,
+                               1};
+    ;
 }
 
 inline dielectric::dielectric(double refraction) : refraction_{refraction} {}
@@ -139,7 +193,10 @@ inline scatter_result_type dielectric::scatter(const ray &in, const hit_record &
     vec direction = (ratio * sin_theta > 1.0 || reflectance(cos_theta, ratio) > random_double())
                         ? reflect(unit_direction, rec.normal())
                         : refract(unit_direction, rec.normal(), ratio);
-    return std::make_optional<std::pair<color, ray>>(std::make_pair(color{1.0, 1.0, 1.0}, ray{rec.p(), direction, in.time()}));
+    return scatter_result_type{std::in_place,
+                               color{1, 1, 1},
+                               ray{rec.p(), direction, in.time()},
+                               1};
 }
 
 inline double dielectric::reflectance(double cos, double ratio) {
@@ -154,8 +211,8 @@ inline diffuse_light::diffuse_light(const std::shared_ptr<texture> &p) : emit_{p
 
 inline diffuse_light::~diffuse_light() {}
 
-inline color diffuse_light::emit(double u, double v, const point &p) const {
-    return emit_->value(u, v, p);
+inline color diffuse_light::emit(const ray &, const hit_record &rec, double u, double v, const point &p) const {
+    return rec.front_face() ? emit_->value(u, v, p) : color{};
 }
 
 inline scatter_result_type diffuse_light::scatter(const ray &, const hit_record &) const {
@@ -167,8 +224,11 @@ inline isotropic::isotropic(const color &c) : albedo_{std::make_shared<solid_col
 inline isotropic::isotropic(const std::shared_ptr<texture> &t) : albedo_{t} {}
 
 inline scatter_result_type isotropic::scatter(const ray &in, const hit_record &rec) const {
-    return std::make_optional<std::pair<color, ray>>(albedo_->value(rec.u(), rec.v(), rec.p()),
-                                                     ray{rec.p(), random_in_unit_sphere(), in.time()});
+    return scatter_result_type{
+        std::in_place,
+        albedo_->value(rec.u(), rec.v(), rec.p()),
+        ray{rec.p(), random_in_unit_sphere(), in.time()},
+        1};
 }
 
 #endif  // MATERIAL_H_

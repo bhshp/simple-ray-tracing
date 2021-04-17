@@ -6,14 +6,24 @@
 #include "generator.h"
 #include "progress_bar.h"
 
-inline color ray_color(const ray& r, const color& background, const hittable& world, int depth) {
+inline color ray_color(const ray& r, const color& background, const hittable& world,
+                       const std::shared_ptr<hittable>& lights, int depth) {
     if (depth <= 0) {
         return color{};
     }
-    if (hit_result_type rec = world.hit(r, eps, inf); rec.has_value()) {
-        color emitted = rec->mat()->emit(rec->u(), rec->v(), rec->p());
-        if (scatter_result_type scatter = rec->mat()->scatter(r, rec.value()); scatter.has_value()) {
-            return emitted + scatter->first % ray_color(scatter->second, background, world, depth - 1);
+    if (hit_result_type rec = world.hit(r, eps, inf);
+        rec.has_value()) {
+        color emitted = rec->mat()->emit(r, rec.value(), rec->u(), rec->v(), rec->p());
+        if (scatter_result_type scatter = rec->mat()->scatter(r, rec.value());
+            scatter.has_value()) {
+            std::shared_ptr<hittable_pdf> p0 = std::make_shared<hittable_pdf>(lights, rec->p());
+            std::shared_ptr<cosine_pdf> p1 = std::make_shared<cosine_pdf>(rec->normal());
+            mixture_pdf p{p0, p1};
+            ray scattered{rec->p(), p.generate(), r.time()};
+            double pdf_value = p.value(scattered.direction());
+            return emitted + rec->mat()->pdf(r, rec.value(), scattered) *
+                                 scatter->albedo() % ray_color(scattered, background, world, lights, depth - 1) /
+                                 pdf_value;
         }
         return emitted;
     }
@@ -23,12 +33,12 @@ inline color ray_color(const ray& r, const color& background, const hittable& wo
 int main() {
     const char* const path = "./target/out.ppm";
 
-    const int image_width = 1920;
-    const int image_height = 1080;
+    const int image_width = 500;
+    const int image_height = 500;
 
     const double aspect_ratio = 1.0 * image_width / image_height;
 
-    const int samples = 10000;
+    const int samples = 200;
     const int max_depth = 50;
 
     point look_from = point{13, 2, 3};
@@ -70,6 +80,7 @@ int main() {
             look_from = point(26, 3, 6);
             look_at = point(0, 2, 0);
             break;
+        default:
         case 6:
             world = cornell_box();
             background = color(0, 0, 0);
@@ -84,7 +95,6 @@ int main() {
             look_at = point{278, 278, 0};
             vertical_field_of_view_degrees = 40;
             break;
-        default:
         case 8:
             world = final_scene();
             background = color(0, 0, 0);
@@ -95,6 +105,9 @@ int main() {
     }
 
     camera cam{aspect_ratio, look_from, look_at, view_up, vertical_field_of_view_degrees, focus_dist, aperture, start_time, end_time};
+
+    std::shared_ptr<hittable> lights =
+        std::make_shared<xz_rectangle>(213, 343, 227, 332, 554, nullptr);
 
     {
         std::ofstream out(path);
@@ -108,7 +121,7 @@ int main() {
                     double u = (i + random_double()) / (image_height - 1);
                     double v = (j + random_double()) / (image_width - 1);
                     ray r = cam.get_ray(u, v);
-                    pixel += ray_color(r, background, world, max_depth);
+                    pixel += ray_color(r, background, world, lights, max_depth);
                 }
                 out << sample_cast(pixel, samples) << '\n';
             }
