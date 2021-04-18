@@ -32,4 +32,6 @@
 *.app
 
 target/*
-!target/current.jpg
+!target/P1.jpg
+!target/P2.jpg
+!target/P3.jpg

@@ -6,7 +6,6 @@ Follow the implementation of [*Ray Tracing In One Weekend*](https://raytracing.g
 
 Finish all 3 books, now open for debugging and adding new features.
 
-
 ## Requirements
 
 C++ standard: -std=c++17
@@ -21,4 +20,8 @@ Simply run `make all -s` on a Linux shell
 
 ## Current Status
 
-![Current Status](target/current.jpg)
+![In One Weekend](target/P1.jpg)
+
+![The Next Week](target/P2.jpg)
+
+![The Rest Of Your Life](target/P3.jpg)
