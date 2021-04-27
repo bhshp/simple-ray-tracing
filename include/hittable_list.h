@@ -55,6 +55,7 @@ inline std::optional<hit_record> hittable_list::hit(const ray &r, double t_min, 
     double closest_so_far = t_max;
     for (const std::shared_ptr<hittable> &o : list_) {
         if (std::optional<hit_record> temp = o->hit(r, t_min, closest_so_far); temp.has_value()) {
+            // store first hit record
             closest_so_far = temp->t();
             result = temp;
         }

@@ -69,8 +69,9 @@ inline lambertian::~lambertian() {}
 inline color lambertian::albedo() const { return albedo_; }
 
 inline scatter_result_type lambertian::scatter(const ray &, const hit_record &rec) const {
-    vec scatter_direction = rec.normal() + random_in_unit_sphere().unit();
+    vec scatter_direction = rec.normal() + random_in_unit_sphere().unit();  // scatter uniformly
     if (scatter_direction.near_zero()) {
+        // avoid divide by 0
         scatter_direction = rec.normal();
     }
     return std::make_optional<std::pair<color, ray>>(std::make_pair(albedo(), ray{rec.p(), scatter_direction}));
@@ -84,8 +85,11 @@ inline color metal::albedo() const { return albedo_; }
 
 inline scatter_result_type metal::scatter(const ray &in, const hit_record &rec) const {
     vec reflected = reflect(in.direction().unit(), rec.normal());
+    // normal reflect
     ray scattered{rec.p(), reflected + fuzz_ * random_in_unit_sphere()};
+    // add turbulance(not perlin turbulance, we call it fuzz)
     if (scattered.direction() * rec.normal() <= 0) {
+        // from inside
         return std::nullopt;
     }
     return std::make_optional<std::pair<color, ray>>(std::make_pair(albedo(), scattered));
@@ -97,10 +101,15 @@ inline dielectric::~dielectric() {}
 
 inline scatter_result_type dielectric::scatter(const ray &in, const hit_record &rec) const {
     double ratio = rec.front_face() ? (1.0 / refraction_) : refraction_;
+    // calculate eta / eta', both in and out
     vec unit_direction = in.direction().unit();
     double cos_theta = std::min(-unit_direction * rec.normal(), 1.0);
+    // solve cos theta
     double sin_theta = std::sqrt(1.0 - sqr(cos_theta));
+    // solve sin theta
     vec direction = (ratio * sin_theta > 1.0 || reflectance(cos_theta, ratio) > random_double())
+    // the ray is reflected with a probability, or it will be invisable
+    // actually, glass is something we can see, since it is not completely transparent
                         ? reflect(unit_direction, rec.normal())
                         : refract(unit_direction, rec.normal(), ratio);
     return std::make_optional<std::pair<color, ray>>(std::make_pair(color{1.0, 1.0, 1.0}, ray{rec.p(), direction}));

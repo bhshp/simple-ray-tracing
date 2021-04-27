@@ -183,6 +183,7 @@ inline std::ostream &operator<<(std::ostream &os, const vec &v) {
 inline vec random_in_unit_sphere() {
     do {
         vec p = vec::random(-1, 1);
+        // similar to Monte Carlo, it's guaranteed that points can be chosen fast with high probability
         if (p.length2() < 1) {
             return p;
         }
@@ -197,6 +198,7 @@ inline vec random_in_hemisphere(const vec &normal) {
 inline vec random_in_unit_disk() {
     do {
         vec p{random_double(-1, 1), random_double(-1, 1), 0};
+        // unit disk on xOy plane
         if (p.length2() < 1) {
             return p;
         }
@@ -204,14 +206,15 @@ inline vec random_in_unit_disk() {
 }
 
 inline vec reflect(const vec &v, const vec &n) {
-    return v - (2 * v * n) * n;
+    return v - (2 * v * n) * n; // normal reflect
 }
 
 inline vec refract(const vec &uv, const vec &n, double ratio) {
     double cos_theta = std::min(-uv * n, 1.0);
-    vec r_vertical = ratio * (uv + cos_theta * n);
-    vec r_parallel = -std::sqrt(1 - r_vertical.length2()) * n;
-    return r_vertical + r_parallel;
+    // solve cos theta between in direction and normal direction
+    vec r_vertical = ratio * (uv + cos_theta * n); // solve vertical
+    vec r_parallel = -std::sqrt(1 - r_vertical.length2()) * n; // solve parallel
+    return r_vertical + r_parallel; // add them together
 }
 
 #endif  // VEC_H_

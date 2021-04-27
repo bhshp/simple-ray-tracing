@@ -26,6 +26,7 @@ hittable_list random_world() {
 
     std::shared_ptr<lambertian> material_ground = std::make_shared<lambertian>(color{0.8, 0.8, 0.5});
     world.push_back(std::make_shared<sphere>(point{0, -1000, 0}, 1000, material_ground));
+    // big sphere as ground
 
     for (int i = -11; i <= 11; i++) {
         for (int j = -11; j <= 11; j++) {
@@ -56,6 +57,7 @@ hittable_list random_world() {
     world.push_back(std::make_shared<sphere>(point{0, 1, 0}, 1.0, std::make_shared<dielectric>(1.5)));
     world.push_back(std::make_shared<sphere>(point{-4, 1, 0}, 1.0, std::make_shared<lambertian>(color(0.4, 0.2, 0.1))));
     world.push_back(std::make_shared<sphere>(point{4, 1, 0}, 1.0, std::make_shared<metal>(color(0.7, 0.6, 0.5), 0.0)));
+    // three big balls
 
     return world;
 }

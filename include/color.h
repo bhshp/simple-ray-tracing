@@ -139,6 +139,7 @@ inline color mix(const color &a, const color &b, double alpha) {
 }
 
 inline color sample_cast(const color &c, int samples) {
+    // gamma correction
     return color{std::sqrt(c.r() / samples),
                  std::sqrt(c.g() / samples),
                  std::sqrt(c.b() / samples)};
