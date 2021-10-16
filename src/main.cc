@@ -6,7 +6,7 @@
 #include "generator.h"
 #include "progress_bar.h"
 
-inline color ray_color(const ray& r, const color& background, const hittable& world,
+color ray_color(const ray& r, const color& background, const hittable& world,
                        const std::shared_ptr<hittable>& lights, int depth) {
     if (depth <= 0) {
         return color{};

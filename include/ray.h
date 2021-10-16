@@ -22,18 +22,4 @@ struct ray {
     double time_;
 };
 
-inline ray::ray() : origin_{}, direction_{}, time_{} {}
-
-inline ray::ray(const point &p, const vec &v, double time) : origin_{p}, direction_{v}, time_{time} {}
-
-inline point ray::origin() const { return origin_; }
-
-inline vec ray::direction() const { return direction_; }
-
-inline double ray::time() const { return time_; }
-
-inline point ray::at(double t) const {
-    return origin_ + direction_ * t;
-}
-
 #endif  // RAY_H_

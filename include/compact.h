@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef COMMON_H_
-#define COMMON_H_
+#ifndef COMPACT_H_
+#define COMPACT_H_
 
 #include "aabb.h"
 #include "box.h"
@@ -23,9 +23,9 @@
 #include "sphere.h"
 #include "texture.h"
 #include "translate.h"
-#include "util.h"
+#include "const.h"
 #include "vec.h"
 
 // Alias
 
-#endif  // COMMON_H_
+#endif  // COMPACT_H_
