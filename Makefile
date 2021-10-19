@@ -7,7 +7,7 @@ target_image = $(target_dir)/out.jpg
 current_image = $(target_dir)/current.jpg
 
 CC = g++
-CCFLAGS = -std=c++17 -Wall -Wextra -Werror -pedantic-errors -I./include -O3
+CCFLAGS = -std=c++17 -Wall -Wextra -Werror -pedantic-errors -I./include -O3 -fopenmp
 
 src = $(wildcard $(src_dir)/*.cc)
 object = $(patsubst $(src_dir)/%.cc,$(target_dir)/%.o,$(src))

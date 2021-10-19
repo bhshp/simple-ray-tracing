@@ -12,9 +12,15 @@ double deg2rad(double deg) {
     return deg / 180.0 * pi;
 }
 
+namespace {
+    std::mt19937_64& get_random_device() {
+        static std::mt19937_64 gen{std::random_device{}()};
+        return gen;
+    }
+}
+
 int random_int(int a, int b) {
-    static std::mt19937_64 gen{std::random_device{}()};
-    return std::uniform_int_distribution<int>{a, b}(gen);
+    return std::uniform_int_distribution<int>{a, b}(get_random_device());
 }
 
 double random_double() {
@@ -22,8 +28,7 @@ double random_double() {
 }
 
 double random_double(double a, double b) {
-    static std::mt19937_64 gen{std::random_device{}()};
-    return std::uniform_real_distribution<double>{a, b}(gen);
+    return std::uniform_real_distribution<double>{a, b}(get_random_device());
 }
 
 int color_cast(double c) {
