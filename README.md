@@ -1,4 +1,4 @@
-# render
+# Naive Ray Tracing
 
 Follow the implementation of [*Ray Tracing In One Weekend*](https://raytracing.github.io/books/RayTracingInOneWeekend.html), [*Ray Tracing The Next Week*](https://raytracing.github.io/books/RayTracingTheNextWeek.html) and [*Ray Tracing The Rest Of Your Life*](https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html).
 
